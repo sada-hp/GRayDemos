@@ -9,6 +9,7 @@ class GPlanetApplication : public IGApplication
 public:
 	std::map<GEnums::EMouse, GEnums::EAction> mouseStates;
 	std::map<GEnums::EKey, GEnums::EAction> keyStates;
+	std::shared_ptr<RenderScope> Scope;
 	GEventListener engineListener;
 	GPlanetWorld world;
 

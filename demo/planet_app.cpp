@@ -2,10 +2,12 @@
 #include "planet_app.hpp"
 #include "Factories/VkMeshFactory.hpp"
 #include "Materials/mesh_material.hpp"
+#include "Factories/VkImageFactory.hpp"
 
 GPlanetApplication::GPlanetApplication()
 	: IGApplication(SWindowParameters{ 1024, 720, "Procedural planet demo" })
 {
+	Scope = Window.GetRenderer().GetScope();
 	engineListener.SetUserPointer(this);
 	Window.SetUpEvents(engineListener);
 
@@ -13,11 +15,20 @@ GPlanetApplication::GPlanetApplication()
 	engineListener.SubscribeMouseMoveEvent(this, &GPlanetApplication::_mouseMove);
 	engineListener.SubscribeMousePressEvent(this, &GPlanetApplication::_mousePress);
 
-	GDrawable testCube{};
-	testCube.Mesh = GVkMeshFactory::Plane(Window.GetRenderer().GetScope(), 150, 150);
-	testCube.Material = GMeshMaterial::Create(Window.GetRenderer().GetScope());
-	testCube.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 100.0);
+	MaterialDescriptor MDescriptor;
+	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0))   });
+	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 0))   });
+	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   0,   255)) });
+	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255, 0))   });
+	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   255)) });
+	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 255)) });
+	// MDescriptor.PolygonMode = VK_POLYGON_MODE_LINE;
+	// MDescriptor.CullMode = VK_CULL_MODE_NONE;
 
+	GDrawable testCube{};
+	testCube.Mesh = GVkMeshFactory::Cube(Scope, 150, 150, 150, 4, 4, true);
+	testCube.Material = GMeshMaterial::Create(Scope, MDescriptor);
+	testCube.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 300.0);
 	world.Add(std::move(testCube));
 }
 
@@ -29,8 +40,8 @@ void GPlanetApplication::_mouseMove(GEvents::MousePosition Event, void* Data)
 {
 	if (mouseStates[GEnums::EMouse::Left] == GEnums::EAction::Press)
 	{
-		const double Mult = 0.005;
-		Camera.GetWorldMatrix().Rotate(Mult * Event.delta_y, Mult * -Event.delta_x, 0.0);
+		const double Mult = 0.01;
+		Camera.GetWorldMatrix().Rotate(Event.delta_y, -Event.delta_x, 0.0);
 	}
 }
 
@@ -47,7 +58,7 @@ void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void* Data)
 void GPlanetApplication::_updateCamera(float Delta)
 {
 	glm::vec3 translation(0.0);
-	const float speed = 5000.0;
+	const float speed = 1000.0;
 
 	if (keyStates[GEnums::EKey::W] != GEnums::EAction::Release)
 		translation.z += speed * Delta;
