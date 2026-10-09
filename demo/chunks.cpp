@@ -37,7 +37,7 @@ std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> S
 
 	auto vertices = std::vector<MeshVertex>();
 	int vertexOffset = 0;
-
+	float size = 10.f;
 
 	for (int chunk_it = 0; chunk_it < ChunkSize; chunk_it++) {
 		int x = chunk_it & (ChunkSide - 1);
@@ -64,11 +64,11 @@ std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> S
 			if (ch.type != 0) continue;
 
 			for (int vert_it = 0; vert_it < 6; vert_it++) {
-				MeshVertex vertex { };
+				MeshVertex vertex{ };
 				vertex.position = {
-					x + vertexPoints[side_it * 6 + vert_it].x,
-					y + vertexPoints[side_it * 6 + vert_it].y,
-					z + vertexPoints[side_it * 6 + vert_it].z
+					size * (x + vertexPoints[side_it * 6 + vert_it].x),
+					size * (y + vertexPoints[side_it * 6 + vert_it].y),
+					size * (z + vertexPoints[side_it * 6 + vert_it].z),
 				};
 				vertex.normal = dir;
 				vertices.push_back(vertex);

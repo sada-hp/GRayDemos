@@ -4,4 +4,5 @@ project(DemoPrj)
 
 set(COMPILE_PATH ${DemoPrj_SOURCE_DIR}/bin)
 add_subdirectory(engine)
+add_subdirectory(chunk_generator)
 add_subdirectory(demo)

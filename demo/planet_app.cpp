@@ -87,7 +87,7 @@ void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void* Data)
 void GPlanetApplication::_updateCamera(float Delta)
 {
 	glm::vec3 translation(0.0);
-	const float speed = 10.0;
+	const float speed = 100.0;
 
 	if (IsNotReleased(EKey::W))
 		translation.z += speed * Delta;
