@@ -1,9 +1,5 @@
-#include "pch.hpp"
 #include "planet_app.hpp"
-#include "Factories/VkMeshFactory.hpp"
-#include "Materials/mesh_material.hpp"
-#include "Factories/VkImageFactory.hpp"
-#include "chunks.hpp"
+
 using namespace GEnums;
 
 GPlanetApplication::GPlanetApplication()
@@ -40,22 +36,52 @@ GPlanetApplication::GPlanetApplication()
 	chunkMaterial2.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255,   0)) });
 	chunkMaterial2.PolygonMode = VK_POLYGON_MODE_LINE;
 
-	GDrawable testChunk{};
-	GDrawable testChunkWireFrame{};
-	auto op = new DemoOperators();
-	auto chunk = std::shared_ptr<Chunk>(new Chunk());
-	op->FillChunk(chunk);
+	//GDrawable testChunk{};
+	////GDrawable testChunkWireFrame{};
+	//auto op = new DemoOperators();
+	//op->Size = 32.f;
+	//auto chunk =  Chunk();
+	//op->FillChunk(&chunk);
 
-	testChunk.Mesh = op->ChunkToMesh(Scope, chunk);
-	testChunkWireFrame.Mesh = testChunk.Mesh;
-	testChunk.Material = GMeshMaterial::Create(Scope, chunkMaterial1);
-	testChunkWireFrame.Material = GMeshMaterial::Create(Scope, chunkMaterial2);
-	testChunk.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 30.0);
-	testChunkWireFrame.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 30.0);
+	//testChunk.Mesh = op->ChunkToMesh(Scope, &chunk);
+	//testChunkWireFrame.Mesh = testChunk.Mesh;
+	//testChunk.Material = GMeshMaterial::Create(Scope, chunkMaterial1);
+	//testChunkWireFrame.Material = GMeshMaterial::Create(Scope, chunkMaterial2);
+	//testChunk.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 30.0);
+	//testChunkWireFrame.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 30.0);
 
-	world.Add(std::move(testChunk));
-	world.Add(std::move(testChunkWireFrame));
+	//world.Add(std::move(testChunk));
+	//world.Add(std::move(testChunkWireFrame));
+
+	atlass = ChunkAtlass(5);
+	DemoOperators op = DemoOperators();
+	op.Size = 4.f;
+
+	for (auto c : atlass.GetChunks()) {
+		GDrawable testChunk{};
+		GDrawable testChunkWireFrame{};
+		//op->FillChunk(c);
+
+		testChunk.Mesh = op.ChunkToMesh(Scope, c);
+		testChunkWireFrame.Mesh = testChunk.Mesh;
+		testChunk.Material = GMeshMaterial::Create(Scope, chunkMaterial1);
+		testChunkWireFrame.Material = GMeshMaterial::Create(Scope, chunkMaterial2);
+
+		glm::vec3 pos{
+			static_cast<float>(c->x * 16 * op.Size / 2),
+			static_cast<float>(c->y * 16 * op.Size),
+			static_cast<float>(c->z * 16 * op.Size / 2)
+		};
+
+		testChunk.WorldMatrix.Translate(pos);
+		testChunkWireFrame.WorldMatrix.Translate(pos);
+
+		world.Add(std::move(testChunk));
+		world.Add(std::move(testChunkWireFrame));
+	}
 }
+
+
 
 GPlanetApplication::~GPlanetApplication()
 {
@@ -83,6 +109,7 @@ void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void* Data)
 
 
 #define IsNotReleased(key) keyStates[key] != EAction::Release
+#define IsJustPressed(key) keyStates[key] == EAction::Press
 
 void GPlanetApplication::_updateCamera(float Delta)
 {
@@ -109,6 +136,10 @@ void GPlanetApplication::_updateCamera(float Delta)
 
 	if (translation.x != 0.0 || translation.y != 0.0 || translation.z != 0.0)
 		Camera.GetWorldMatrix().Translate(translation);
+
+	if (IsJustPressed(EKey::R)) {
+		world.Clear();
+	}
 }
 
 void GPlanetApplication::Update(float Delta)

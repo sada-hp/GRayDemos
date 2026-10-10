@@ -1,7 +1,7 @@
+#pragma once
 #include "chunks.hpp"
-#include <iostream>
 
-void DemoOperators::FillChunk(std::shared_ptr<Chunk> chunk) const {
+void DemoOperators::FillChunk(Chunk* chunk) const {
 	chunk->VoxelArray = std::vector<Voxel>(ChunkSize);
 
 	for (int i = 0; i < ChunkSize; i++) {
@@ -21,7 +21,7 @@ void DemoOperators::FillChunk(std::shared_ptr<Chunk> chunk) const {
 	}
 }
 
-std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> Scope, std::shared_ptr<Chunk> chunk) const
+std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> Scope, Chunk* chunk) const
 {
 	const glm::vec3 dirs[] = {
 		{1,0,0}, {-1,0,0}, {0,1,0}, {0,-1,0}, {0,0,1}, {0,0,-1}
@@ -37,7 +37,6 @@ std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> S
 
 	auto vertices = std::vector<MeshVertex>();
 	int vertexOffset = 0;
-	float size = 10.f;
 
 	for (int chunk_it = 0; chunk_it < ChunkSize; chunk_it++) {
 		int x = chunk_it & (ChunkSide - 1);
@@ -66,9 +65,9 @@ std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> S
 			for (int vert_it = 0; vert_it < 6; vert_it++) {
 				MeshVertex vertex{ };
 				vertex.position = {
-					size * (x + vertexPoints[side_it * 6 + vert_it].x),
-					size * (y + vertexPoints[side_it * 6 + vert_it].y),
-					size * (z + vertexPoints[side_it * 6 + vert_it].z),
+					Size * (x + vertexPoints[side_it * 6 + vert_it].x),
+					Size * (y + vertexPoints[side_it * 6 + vert_it].y),
+					Size * (z + vertexPoints[side_it * 6 + vert_it].z),
 				};
 				vertex.normal = dir;
 				vertices.push_back(vertex);

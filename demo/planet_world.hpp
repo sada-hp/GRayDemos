@@ -3,6 +3,7 @@
 
 class GPlanetWorld : public IWorld
 {
+private:
 	std::vector<GDrawable> _drawableObjects;
 
 public:

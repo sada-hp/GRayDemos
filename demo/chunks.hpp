@@ -1,20 +1,6 @@
 #pragma once
 #include "Factories/VkMeshFactory.hpp"
-
-class Voxel {
-public:
-	int type;
-};
-
-class Chunk {
-public:
-	std::vector<Voxel> VoxelArray;
-};
-
-class ChunkAtlass {
-public:
-	std::vector<Chunk> ChunkArray;
-};
+#include "dummy.hpp"
 
 class DemoOperators {
 private:
@@ -24,8 +10,10 @@ private:
 	float VoxelSideSize = 1.f;
 
 public:
-	void FillChunk(std::shared_ptr<Chunk>) const;
-	std::shared_ptr<IMesh> ChunkToMesh(std::shared_ptr<RenderScope> Scope, std::shared_ptr<Chunk>) const;
+	float Size = 10.f;
+
+	void FillChunk(Chunk*) const;
+	std::shared_ptr<IMesh> ChunkToMesh(std::shared_ptr<RenderScope> Scope, Chunk*) const;
 
 	std::shared_ptr<ChunkAtlass> CreateExampleAtlass();
 	void DrawVoxel(Voxel*);

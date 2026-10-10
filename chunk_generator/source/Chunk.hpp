@@ -1,53 +1,54 @@
 ﻿#pragma once
+#include "base.hpp"
+#include "chunk_loader/noize_loader.hpp"
 #include <vector>
 #include <memory>
-#include "noise/MurmurHash3.h"
 
-struct Voxel {
-public:
-	uint32_t type;
-};
 
-struct Chunk
-{
-public:
-	std::vector<Voxel> VoxelArray;
-};
-
-class ChunkMethods {
+class ChunkAtlass {
 private:
-	uint16_t ChunkSide = 16;
+	/// <summary>
+	/// Размер чанка
+	/// </summary>
+	uint32_t _chunk_side;
+
+	/// <summary>
+	/// Радиус отображаемых чанков
+	/// </summary>
+	uint32_t _visible_radius;
+
+	std::unique_ptr<IChunkLoader> _loader;
+
+	int64_t _center[2] = { 0, 0 };
+	std::vector<Chunk*> _chunks = {};
+
 public:
-	inline Voxel* GetVoxel(Chunk* chunk, uint32_t x, uint32_t y, uint32_t z) {
-		return GetVoxel(chunk, x, y, z, ChunkSide);
-	}
-	Voxel* GetVoxel(Chunk* chunk, uint32_t x, uint32_t y, uint32_t z, uint32_t side) {
-		if (!chunk) return nullptr;
-		return &chunk->VoxelArray[0];
-	}
-};
+	const std::vector<Chunk*>& GetChunks() { return _chunks; }
 
-class ChunkGenerator {
-private:
-	uint64_t _seed;
-	uint32_t _chunkSide = 16;
-public:
-	ChunkGenerator(uint64_t seed) {
-		_seed = seed;
-	}
+	ChunkAtlass(const size_t visible_radius = 2, const uint32_t chunk_side = 16) {
+		_loader = std::make_unique<WhiteNoiseLoader>(0xDEADBEEF, chunk_side);
 
-	Chunk* GetChunk(uint32_t x, uint32_t y, uint32_t z) {
-		uint32_t out = _seed;
-		Chunk* c = new Chunk();
-		c->VoxelArray.reserve(_chunkSide * _chunkSide * _chunkSide);
+		_visible_radius = visible_radius;
+		_chunk_side = chunk_side;
 
-		for (int i = 0; i < _chunkSide * _chunkSide * _chunkSide; i++) {
-			MurmurHash3_x86_32(&out, _seed, 1, &out);
-			Voxel v = Voxel();
-			v.type = out & 0x1;
-			c->VoxelArray.push_back(v);
+		Recalculate();
+	};
+
+	void Recalculate() {
+		for (auto chunk : _chunks) {
+			delete chunk;
 		}
 
-		return c;
+		// Один слой буферный, его загружаем, но не отображаем
+		uint32_t side_size = _visible_radius ;
+		uint32_t buff_size = side_size * side_size * side_size;
+		_chunks.reserve(buff_size);
+
+		for (int ind = 0; ind < buff_size; ind++) {
+			int64_t x = ind % side_size;
+			int64_t y = (ind / side_size) % side_size;
+			int64_t z = (ind / (side_size * side_size)) % side_size;
+			_chunks.push_back(_loader->LoadChunk(x, y, z));
+		}
 	}
 };
