@@ -75,6 +75,8 @@ std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> S
 		}
 	}
 
+	if (vertices.size() == 0)
+		return nullptr;
 	return std::shared_ptr<IMesh>(new GVkMesh<MeshVertex>(Scope, vertices));
 }
 

@@ -37,7 +37,7 @@ GPlanetApplication::GPlanetApplication()
 	chunkMaterial2.PolygonMode = VK_POLYGON_MODE_LINE;
 
 	//GDrawable testChunk{};
-	////GDrawable testChunkWireFrame{};
+	//GDrawable testChunkWireFrame{};
 	//auto op = new DemoOperators();
 	//op->Size = 32.f;
 	//auto chunk =  Chunk();
@@ -60,7 +60,9 @@ GPlanetApplication::GPlanetApplication()
 	for (auto c : atlass.GetChunks()) {
 		GDrawable testChunk{};
 		GDrawable testChunkWireFrame{};
-		//op->FillChunk(c);
+		auto mesh = op.ChunkToMesh(Scope, c);
+		
+		if (!mesh) continue;
 
 		testChunk.Mesh = op.ChunkToMesh(Scope, c);
 		testChunkWireFrame.Mesh = testChunk.Mesh;
