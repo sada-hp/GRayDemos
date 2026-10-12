@@ -87,12 +87,13 @@ GPlanetApplication::GPlanetApplication()
 
 GPlanetApplication::~GPlanetApplication()
 {
+	TestActor = nullptr;
 }
 
 
 void GPlanetApplication::_mouseMove(GEvents::MousePosition Event, void* Data)
 {
-	if (mouseStates[GEnums::EMouse::Left] == GEnums::EAction::Press)
+	if (mouseStates[GEnums::EMouse::Left] == GEnums::EAction::Press && !GUI::IsFocused())
 	{
 		const double Mult = 0.3;
 		Camera.GetWorldMatrix().Rotate(Mult * Event.delta_y, Mult * -Event.delta_x, 0.0);
