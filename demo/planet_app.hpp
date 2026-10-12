@@ -1,7 +1,8 @@
 #pragma once
+#include "UI/imgui_ui.hpp"
 #include "Engine/application.hpp"
 #include "Engine/event_listener.hpp"
-#include "planet_world.hpp"
+#include "World/planet_world.hpp"
 #include <map>
 
 class GPlanetApplication : public IGApplication
@@ -10,8 +11,10 @@ public:
 	std::map<GEnums::EMouse, GEnums::EAction> mouseStates;
 	std::map<GEnums::EKey, GEnums::EAction> keyStates;
 	std::shared_ptr<RenderScope> Scope;
-	GEventListener engineListener;
+	
 	GPlanetWorld world;
+	GEventListener engineListener;
+	std::shared_ptr<GActor> TestActor;
 
 protected:
 	void _mouseMove(GEvents::MousePosition Event, void* Data);

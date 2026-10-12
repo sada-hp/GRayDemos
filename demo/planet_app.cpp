@@ -22,23 +22,22 @@ GPlanetApplication::GPlanetApplication()
 	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255, 0))   });
 	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   255)) });
 	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 255)) });
-	// MDescriptor.PolygonMode = VK_POLYGON_MODE_LINE;
-	// MDescriptor.CullMode = VK_CULL_MODE_NONE;
 
-	GDrawable testCube{};
-	testCube.Mesh = GVkMeshFactory::Cube(Scope, 150, 150, 150, 4, 4, true);
-	testCube.Material = GMeshMaterial::Create(Scope, MDescriptor);
-	testCube.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 300.0);
-	world.Add(std::move(testCube));
+	TestActor = world.NewActor();
+	TestActor->Translate(Camera.GetWorldMatrix().GetUp() * 350.0);
+	TestActor->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, 150, 150, 150, 1, 1, true), GMeshMaterial::Create(Scope, MDescriptor));
+
+	Window.GetRenderer().AddRenderStage<GUI>(Window);
 }
 
 GPlanetApplication::~GPlanetApplication()
 {
+	TestActor = nullptr;
 }
 
 void GPlanetApplication::_mouseMove(GEvents::MousePosition Event, void* Data)
 {
-	if (mouseStates[GEnums::EMouse::Left] == GEnums::EAction::Press)
+	if (mouseStates[GEnums::EMouse::Left] == GEnums::EAction::Press && !GUI::IsFocused())
 	{
 		const double Mult = 0.01;
 		Camera.GetWorldMatrix().Rotate(Event.delta_y, -Event.delta_x, 0.0);
