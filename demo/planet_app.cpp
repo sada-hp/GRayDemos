@@ -1,4 +1,5 @@
 #include "planet_app.hpp"
+#include "UI/imgui_ui.hpp"
 
 using namespace GEnums;
 
@@ -8,33 +9,36 @@ GPlanetApplication::GPlanetApplication()
 	Scope = Window.GetRenderer().GetScope();
 	engineListener.SetUserPointer(this);
 	Window.SetUpEvents(engineListener);
+	Window.GetRenderer().AddRenderStage<GUI>(Window);
 
 	engineListener.SubscribeKeyPressEvent(this, &GPlanetApplication::_keyPress);
 	engineListener.SubscribeMouseMoveEvent(this, &GPlanetApplication::_mouseMove);
 	engineListener.SubscribeMousePressEvent(this, &GPlanetApplication::_mousePress);
 
-	MaterialDescriptor MDescriptor;
-	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0))   });
-	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 0))   });
-	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   0,   255)) });
-	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255, 0))   });
-	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   255)) });
-	MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 255)) });
+	world._initDebug(Scope);
+
+	//MaterialDescriptor MDescriptor;
+	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0))   });
+	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 0))   });
+	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   0,   255)) });
+	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255, 0))   });
+	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   255)) });
+	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 255)) });
 	 //MDescriptor.PolygonMode = VK_POLYGON_MODE_LINE;
 	 //MDescriptor.CullMode = VK_CULL_MODE_NONE;
 
-	GDrawable testCube{};
-	testCube.Mesh = GVkMeshFactory::Cube(Scope, 150, 150, 150, 4, 4, true);
-	testCube.Material = GMeshMaterial::Create(Scope, MDescriptor);
-	testCube.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * -300.0);
-	world.Add(std::move(testCube));
+	//GDrawable testCube{};
+	//testCube.Mesh = GVkMeshFactory::Cube(Scope, 150, 150, 150, 4, 4, true);
+	//testCube.Material = GMeshMaterial::Create(Scope, MDescriptor);
+	//testCube.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * -300.0);
+	//world.Add(std::move(testCube));
 
-	MaterialDescriptor chunkMaterial1;
-	chunkMaterial1.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0)) });
+	//MaterialDescriptor chunkMaterial1;
+	//chunkMaterial1.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0)) });
 
-	MaterialDescriptor chunkMaterial2;
-	chunkMaterial2.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255,   0)) });
-	chunkMaterial2.PolygonMode = VK_POLYGON_MODE_LINE;
+	//MaterialDescriptor chunkMaterial2;
+	//chunkMaterial2.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255,   0)) });
+	//chunkMaterial2.PolygonMode = VK_POLYGON_MODE_LINE;
 
 	//GDrawable testChunk{};
 	//GDrawable testChunkWireFrame{};
@@ -53,43 +57,39 @@ GPlanetApplication::GPlanetApplication()
 	//world.Add(std::move(testChunk));
 	//world.Add(std::move(testChunkWireFrame));
 
-	atlass = ChunkAtlass(5);
-	DemoOperators op = DemoOperators();
-	op.Size = 4.f;
+	//atlass = ChunkAtlass(5);
+	//DemoOperators op = DemoOperators();
+	//op.Size = 4.f;
 
-	for (auto c : atlass.GetChunks()) {
-		GDrawable testChunk{};
-		GDrawable testChunkWireFrame{};
-		auto mesh = op.ChunkToMesh(Scope, c);
-		
-		if (!mesh) continue;
+	//for (auto c : atlass.GetChunks()) {
+	//	GDrawable testChunk{};
+	//	GDrawable testChunkWireFrame{};
+	//	auto mesh = op.ChunkToMesh(Scope, c);
+	//	
+	//	if (!mesh) continue;
 
-		testChunk.Mesh = op.ChunkToMesh(Scope, c);
-		testChunkWireFrame.Mesh = testChunk.Mesh;
-		testChunk.Material = GMeshMaterial::Create(Scope, chunkMaterial1);
-		testChunkWireFrame.Material = GMeshMaterial::Create(Scope, chunkMaterial2);
+	//	testChunk.Mesh = op.ChunkToMesh(Scope, c);
+	//	testChunkWireFrame.Mesh = testChunk.Mesh;
+	//	testChunk.Material = GMeshMaterial::Create(Scope, chunkMaterial1);
+	//	testChunkWireFrame.Material = GMeshMaterial::Create(Scope, chunkMaterial2);
 
-		glm::vec3 pos{
-			static_cast<float>(c->x * 16 * op.Size / 2),
-			static_cast<float>(c->y * 16 * op.Size),
-			static_cast<float>(c->z * 16 * op.Size / 2)
-		};
+	//	glm::vec3 pos{
+	//		static_cast<float>(c->x * 16 * op.Size / 2),
+	//		static_cast<float>(c->y * 16 * op.Size),
+	//		static_cast<float>(c->z * 16 * op.Size / 2)
+	//	};
 
-		testChunk.WorldMatrix.Translate(pos);
-		testChunkWireFrame.WorldMatrix.Translate(pos);
+	//	testChunk.WorldMatrix.Translate(pos);
+	//	testChunkWireFrame.WorldMatrix.Translate(pos);
 
-		world.Add(std::move(testChunk));
-		world.Add(std::move(testChunkWireFrame));
-	}
+	//	world.Add(std::move(testChunk));
+	//	world.Add(std::move(testChunkWireFrame));
+	//}
 }
-
-
 
 GPlanetApplication::~GPlanetApplication()
 {
-	TestActor = nullptr;
 }
-
 
 void GPlanetApplication::_mouseMove(GEvents::MousePosition Event, void* Data)
 {
@@ -117,7 +117,7 @@ void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void* Data)
 void GPlanetApplication::_updateCamera(float Delta)
 {
 	glm::vec3 translation(0.0);
-	const float speed = 100.0;
+	const float speed = 100000.0;
 
 	if (IsNotReleased(EKey::W))
 		translation.z += speed * Delta;
@@ -139,14 +139,12 @@ void GPlanetApplication::_updateCamera(float Delta)
 
 	if (translation.x != 0.0 || translation.y != 0.0 || translation.z != 0.0)
 		Camera.GetWorldMatrix().Translate(translation);
-
-	if (IsJustPressed(EKey::R)) {
-		world.Clear();
-	}
 }
 
 void GPlanetApplication::Update(float Delta)
 {
 	Window.SetTitle(("Procedural planet demo " + std::format("{:.1f}", 1.0 / Delta)).c_str());
 	_updateCamera(Delta);
+
+	world.updateChunks(Scope, Camera);
 }

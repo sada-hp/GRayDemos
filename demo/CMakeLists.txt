@@ -3,6 +3,7 @@ include_directories(${DemoPrj_SOURCE_DIR}/engine/source)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${DemoPrj_SOURCE_DIR}/chunk_generator/include)
 include_directories(${DemoPrj_SOURCE_DIR}/chunk_generator/source)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE ROOT_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp" "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 
