@@ -50,6 +50,12 @@ void GUI::_weatherControls(IWorld& World)
 	World.SetSunDirection(glm::mix(bot, top, _sun));
 }
 
+void GUI::_cameraPos(const GCamera& Camera, const IWorld& World){
+	auto cp = Camera.GetLocalMatrix().GetPosition();
+	ImGui::Text("%3.f %3.f %3.f", cp.x, cp.y, cp.z);
+}
+
+
 void GUI::Execute(const GCamera& Camera, const IWorld& World)
 {
 	ImGui_ImplVulkan_NewFrame();
@@ -59,6 +65,7 @@ void GUI::Execute(const GCamera& Camera, const IWorld& World)
 	ImGui::Begin("Debug window", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SetWindowPos(ImVec2{ 0, 0 });
 	_weatherControls(const_cast<IWorld&>(World));
+	_cameraPos(const_cast<GCamera&>(Camera), const_cast<IWorld&>(World));
 	ImGui::End();
 
 	ImGui::Render();

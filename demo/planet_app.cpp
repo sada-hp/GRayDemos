@@ -16,6 +16,7 @@ GPlanetApplication::GPlanetApplication()
 	engineListener.SubscribeMousePressEvent(this, &GPlanetApplication::_mousePress);
 
 	world._initDebug(Scope);
+	// world._initVoxels(Scope);
 
 	//MaterialDescriptor MDescriptor;
 	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0))   });
@@ -42,7 +43,7 @@ GPlanetApplication::GPlanetApplication()
 
 	//GDrawable testChunk{};
 	//GDrawable testChunkWireFrame{};
-	//auto op = new DemoOperators();
+	//auto op = new ChunkMeshfactory();
 	//op->Size = 32.f;
 	//auto chunk =  Chunk();
 	//op->FillChunk(&chunk);
@@ -58,7 +59,7 @@ GPlanetApplication::GPlanetApplication()
 	//world.Add(std::move(testChunkWireFrame));
 
 	//atlass = ChunkAtlass(5);
-	//DemoOperators op = DemoOperators();
+	//ChunkMeshfactory op = ChunkMeshfactory();
 	//op.Size = 4.f;
 
 	//for (auto c : atlass.GetChunks()) {
@@ -114,10 +115,17 @@ void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void* Data)
 #define IsNotReleased(key) keyStates[key] != EAction::Release
 #define IsJustPressed(key) keyStates[key] == EAction::Press
 
+
+float speed = 5.0;
 void GPlanetApplication::_updateCamera(float Delta)
 {
+// const float speed = 100000.0;
 	glm::vec3 translation(0.0);
-	const float speed = 100000.0;
+	
+	if (IsNotReleased(EKey::PageUp))
+		speed += 2;
+	if (IsNotReleased(EKey::PageDown))
+		speed -= 2;
 
 	if (IsNotReleased(EKey::W))
 		translation.z += speed * Delta;
@@ -131,10 +139,10 @@ void GPlanetApplication::_updateCamera(float Delta)
 	if (IsNotReleased(EKey::D))
 		translation.x -= speed * Delta;
 
-	if (IsNotReleased(EKey::PageUp) || IsNotReleased(EKey::E) || IsNotReleased(EKey::Space))
+	if (IsNotReleased(EKey::E) || IsNotReleased(EKey::Space))
 		translation.y += speed * Delta;
 
-	if (IsNotReleased(EKey::PageDown) || IsNotReleased(EKey::Q))
+	if (IsNotReleased(EKey::Q) || IsNotReleased(EKey::LeftControl))
 		translation.y -= speed * Delta;
 
 	if (translation.x != 0.0 || translation.y != 0.0 || translation.z != 0.0)

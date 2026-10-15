@@ -1,6 +1,8 @@
 engine\
+cache/
 bin/
 build/
 *.bat
 *.bak
 .vs/
+.vscode/

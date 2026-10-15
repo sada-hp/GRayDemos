@@ -1,7 +1,7 @@
 #pragma once
 #include "chunks.hpp"
 
-void DemoOperators::FillChunk(Chunk* chunk) const {
+void ChunkMeshfactory::FillChunk(Chunk* chunk) const {
 	chunk->VoxelArray = std::vector<Voxel>(ChunkSize);
 
 	for (int i = 0; i < ChunkSize; i++) {
@@ -21,7 +21,7 @@ void DemoOperators::FillChunk(Chunk* chunk) const {
 	}
 }
 
-std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> Scope, Chunk* chunk) const
+std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope> Scope, Chunk* chunk, double earth_radius) const
 {
 	const glm::vec3 dirs[] = {
 		{1,0,0}, {-1,0,0}, {0,1,0}, {0,-1,0}, {0,0,1}, {0,0,-1}
@@ -64,11 +64,11 @@ std::shared_ptr<IMesh> DemoOperators::ChunkToMesh(std::shared_ptr<RenderScope> S
 
 			for (int vert_it = 0; vert_it < 6; vert_it++) {
 				MeshVertex vertex{ };
-				vertex.position = {
+				vertex.position = glm::dvec3{
 					Size * (x + vertexPoints[side_it * 6 + vert_it].x),
 					Size * (y + vertexPoints[side_it * 6 + vert_it].y),
 					Size * (z + vertexPoints[side_it * 6 + vert_it].z),
-				};
+				} ;
 				vertex.normal = dir;
 				vertices.push_back(vertex);
 			}

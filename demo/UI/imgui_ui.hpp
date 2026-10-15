@@ -12,7 +12,7 @@ class GUI : public IRenderStage
 
 private:
 	void _weatherControls(IWorld& World);
-
+	void _cameraPos(const GCamera& Camera, const IWorld& World);
 public:
 	GUI(std::shared_ptr<RenderScope> Scope, const GVkSharedResources& Resources, GWindow& Window);
 	~GUI();

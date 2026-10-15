@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "chunk.hpp"
-#include "chunk_loader/chunk_loader.hpp"
+#include "chunk_atlass.hpp"
 
 int GetInt();
