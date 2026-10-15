@@ -1,3 +1,4 @@
+#include "iostream"
 
 Chunk *WhiteNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
 {
@@ -22,8 +23,9 @@ Chunk *WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, st
 	c->y = y;
 	c->z = z;
 	c->VoxelArray.reserve(_chunkSide * _chunkSide * _chunkSide);
+	// std:: cout << params.x << " "<< params.y << " "<< params.z <<  " " <<  _seed << std::endl;
 
-	for (int i = 0; i < _chunkSide * _chunkSide * _chunkSide; i++)
+	for (uint32_t i = 0; i < _chunkSide * _chunkSide * _chunkSide; i++)
 	{
 		params.x = c->x + (i & (_chunkSide - 1));
 		params.z = c->z + (i >> (4 * 2));

@@ -16,7 +16,7 @@ GPlanetApplication::GPlanetApplication()
 	engineListener.SubscribeMousePressEvent(this, &GPlanetApplication::_mousePress);
 
 	world._initDebug(Scope);
-	// world._initVoxels(Scope);
+	// world._initVoxels(Scope, Camera.GetWorldMatrix().GetPosition(), Camera);
 
 	//MaterialDescriptor MDescriptor;
 	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0))   });

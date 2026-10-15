@@ -22,7 +22,7 @@ private:
 	std::vector<Chunk *> _chunks = {};
 
 public:
-	ChunkAtlass(const size_t visible_radius = 2, const uint32_t chunk_side = 16)
+	ChunkAtlass(const uint32_t visible_radius = 2, const uint32_t chunk_side = 16)
 	{
 		_loader = std::make_unique<WhiteNoiseLoader>(0xDEADBEEF, chunk_side);
 

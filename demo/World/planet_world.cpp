@@ -4,7 +4,7 @@
 
 GPlanetWorld::GPlanetWorld()
 {
-	_atlass = ChunkAtlass(3);
+	_atlass = ChunkAtlass(3, 32);
 	// _meshFactory.Size = 2;
 }
 
@@ -67,15 +67,15 @@ void GPlanetWorld::updateChunks(std::shared_ptr<RenderScope> Scope, const GCamer
 #else
 	glm::dvec3 camPos = Camera.GetWorldMatrix().GetPosition();
 
-	bool b_x = camPos.x > prevPos.x + 8 || camPos.x < prevPos.x - 8;
-	bool b_y = camPos.y > prevPos.y + 8 || camPos.y < prevPos.y - 8;
-	bool b_z = camPos.z > prevPos.z + 8 || camPos.z < prevPos.z - 8;
+	bool b_x = camPos.x > prevPos.x + 32 || camPos.x < prevPos.x;
+	bool b_y = camPos.y > prevPos.y + 32 || camPos.y < prevPos.y;
+	bool b_z = camPos.z > prevPos.z + 32 || camPos.z < prevPos.z;
 
 	if (b_x || b_y || b_z)
 	{
-		prevPos.x = (floor(camPos.x / 16) * 16) + 8;
-		prevPos.y = (floor(camPos.y / 16) * 16) + 8;
-		prevPos.z = (floor(camPos.z / 16) * 16) + 8;
+		prevPos.x = (floor(camPos.x / 32) * 32) ;
+		prevPos.y = (floor(camPos.y / 32) * 32) ;
+		prevPos.z = (floor(camPos.z / 32) * 32) ;
 
 		_initVoxels(Scope, prevPos, Camera);
 	}
