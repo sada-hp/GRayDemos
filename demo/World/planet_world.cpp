@@ -87,19 +87,25 @@ void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::ve
 	_chunks.clear();
 	_atlass.Recalculate(position.x, position.y, position.z);
 
+	if (!_debugMaterial)
+	{
+		MaterialDescriptor debugMaterial;
+		debugMaterial.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(128, 255, 0)) });
+
+		_debugMaterial = GMeshMaterial::Create(Scope, debugMaterial);
+	}
+
 	for (auto c : _atlass.GetChunks())
 	{
 		auto mesh = _meshFactory.ChunkToMesh(Scope, c, earth_radius);
-		MaterialDescriptor debugMaterial;
-		debugMaterial.SubmeshTextures.push_back(TexturePack{.Albedo = GVkImageFactory::SolidColor(Scope, COLOR(128, 255, 0))});
-		// debugMaterial.PolygonMode = VK_POLYGON_MODE_LINE;
 
 		std::shared_ptr<GActor> chunk = NewActor();
-		chunk->AddComponent<GDrawable>(mesh, GMeshMaterial::Create(Scope, debugMaterial));
+		chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
 
 		// chunk->Translate(glm::normalize(position) * glm::vec3{0, -6360.f * 1e3, 0});
 		chunk->Translate(glm::vec3{0, -6360.f * 1e3, 0});
 		chunk->Translate({c->x, c->y, c->z});
+
 		glm::dvec3 camPos = Camera.GetWorldMatrix().GetPosition();
 		auto p = chunk->GetTransform().GetPosition();
 		auto t = chunk->GetTransform();

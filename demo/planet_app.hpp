@@ -18,11 +18,17 @@ public:
 	std::map<GEnums::EKey, GEnums::EAction> keyStates;
 	std::shared_ptr<RenderScope> Scope;
 
+	std::shared_ptr<IMaterial> _debugMaterial;
+
 	GEventListener engineListener;
 	GPlanetWorld world;
 	ChunkAtlass atlass;
 
+	std::shared_ptr<GActor> _debugCube;
+	float camera_speed = 1000.f;
+
 protected:
+	void _wheelScroll(GEvents::ScrollDelta Event, void* Data);
 	void _mouseMove(GEvents::MousePosition Event, void* Data);
 	void _mousePress(GEvents::MousePress Event, void* Data);
 	void _keyPress(GEvents::KeyPress Event, void* Data);

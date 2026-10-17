@@ -1,6 +1,9 @@
 #include "planet_app.hpp"
 #include "UI/imgui_ui.hpp"
 
+#define IsNotReleased(key) keyStates[key] != EAction::Release
+#define IsJustPressed(key) keyStates[key] == EAction::Press
+
 using namespace GEnums;
 
 GPlanetApplication::GPlanetApplication()
@@ -12,84 +15,24 @@ GPlanetApplication::GPlanetApplication()
 	Window.GetRenderer().AddRenderStage<GUI>(Window);
 
 	engineListener.SubscribeKeyPressEvent(this, &GPlanetApplication::_keyPress);
+	engineListener.SubscribeScrollEvent(this, &GPlanetApplication::_wheelScroll);
 	engineListener.SubscribeMouseMoveEvent(this, &GPlanetApplication::_mouseMove);
 	engineListener.SubscribeMousePressEvent(this, &GPlanetApplication::_mousePress);
 
 	world._initDebug(Scope);
-	// world._initVoxels(Scope, Camera.GetWorldMatrix().GetPosition(), Camera);
 
-	//MaterialDescriptor MDescriptor;
-	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0))   });
-	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 0))   });
-	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   0,   255)) });
-	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255, 0))   });
-	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   255)) });
-	//MDescriptor.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0,   255, 255)) });
-	 //MDescriptor.PolygonMode = VK_POLYGON_MODE_LINE;
-	 //MDescriptor.CullMode = VK_CULL_MODE_NONE;
-
-	//GDrawable testCube{};
-	//testCube.Mesh = GVkMeshFactory::Cube(Scope, 150, 150, 150, 4, 4, true);
-	//testCube.Material = GMeshMaterial::Create(Scope, MDescriptor);
-	//testCube.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * -300.0);
-	//world.Add(std::move(testCube));
-
-	//MaterialDescriptor chunkMaterial1;
-	//chunkMaterial1.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 0,   0)) });
-
-	//MaterialDescriptor chunkMaterial2;
-	//chunkMaterial2.SubmeshTextures.push_back(TexturePack{ .Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255,   0)) });
-	//chunkMaterial2.PolygonMode = VK_POLYGON_MODE_LINE;
-
-	//GDrawable testChunk{};
-	//GDrawable testChunkWireFrame{};
-	//auto op = new ChunkMeshfactory();
-	//op->Size = 32.f;
-	//auto chunk =  Chunk();
-	//op->FillChunk(&chunk);
-
-	//testChunk.Mesh = op->ChunkToMesh(Scope, &chunk);
-	//testChunkWireFrame.Mesh = testChunk.Mesh;
-	//testChunk.Material = GMeshMaterial::Create(Scope, chunkMaterial1);
-	//testChunkWireFrame.Material = GMeshMaterial::Create(Scope, chunkMaterial2);
-	//testChunk.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 30.0);
-	//testChunkWireFrame.WorldMatrix.Translate(Camera.GetWorldMatrix().GetForward() * 30.0);
-
-	//world.Add(std::move(testChunk));
-	//world.Add(std::move(testChunkWireFrame));
-
-	//atlass = ChunkAtlass(5);
-	//ChunkMeshfactory op = ChunkMeshfactory();
-	//op.Size = 4.f;
-
-	//for (auto c : atlass.GetChunks()) {
-	//	GDrawable testChunk{};
-	//	GDrawable testChunkWireFrame{};
-	//	auto mesh = op.ChunkToMesh(Scope, c);
-	//	
-	//	if (!mesh) continue;
-
-	//	testChunk.Mesh = op.ChunkToMesh(Scope, c);
-	//	testChunkWireFrame.Mesh = testChunk.Mesh;
-	//	testChunk.Material = GMeshMaterial::Create(Scope, chunkMaterial1);
-	//	testChunkWireFrame.Material = GMeshMaterial::Create(Scope, chunkMaterial2);
-
-	//	glm::vec3 pos{
-	//		static_cast<float>(c->x * 16 * op.Size / 2),
-	//		static_cast<float>(c->y * 16 * op.Size),
-	//		static_cast<float>(c->z * 16 * op.Size / 2)
-	//	};
-
-	//	testChunk.WorldMatrix.Translate(pos);
-	//	testChunkWireFrame.WorldMatrix.Translate(pos);
-
-	//	world.Add(std::move(testChunk));
-	//	world.Add(std::move(testChunkWireFrame));
-	//}
+	_debugCube = world.NewActor();
+	_debugCube->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, 100, 100, 100), GMeshMaterial::Create(Scope));
+	_debugCube->Translate(-glm::dvec3(100, 0, 400));
 }
 
 GPlanetApplication::~GPlanetApplication()
 {
+}
+
+void GPlanetApplication::_wheelScroll(GEvents::ScrollDelta Event, void* Data)
+{
+	camera_speed += Event.y * 100.0;
 }
 
 void GPlanetApplication::_mouseMove(GEvents::MousePosition Event, void* Data)
@@ -111,39 +54,27 @@ void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void* Data)
 	keyStates[Event.key] = Event.action;
 }
 
-
-#define IsNotReleased(key) keyStates[key] != EAction::Release
-#define IsJustPressed(key) keyStates[key] == EAction::Press
-
-
-float speed = 5.0;
 void GPlanetApplication::_updateCamera(float Delta)
 {
-// const float speed = 100000.0;
 	glm::vec3 translation(0.0);
 	
-	if (IsNotReleased(EKey::PageUp))
-		speed += 2;
-	if (IsNotReleased(EKey::PageDown))
-		speed -= 2;
-
 	if (IsNotReleased(EKey::W))
-		translation.z += speed * Delta;
+		translation.z += camera_speed * Delta;
 
 	if (IsNotReleased(EKey::S))
-		translation.z -= speed * Delta;
+		translation.z -= camera_speed * Delta;
 
 	if (IsNotReleased(EKey::A))
-		translation.x += speed * Delta;
+		translation.x += camera_speed * Delta;
 
 	if (IsNotReleased(EKey::D))
-		translation.x -= speed * Delta;
+		translation.x -= camera_speed * Delta;
 
 	if (IsNotReleased(EKey::E) || IsNotReleased(EKey::Space))
-		translation.y += speed * Delta;
+		translation.y += camera_speed * Delta;
 
 	if (IsNotReleased(EKey::Q) || IsNotReleased(EKey::LeftControl))
-		translation.y -= speed * Delta;
+		translation.y -= camera_speed * Delta;
 
 	if (translation.x != 0.0 || translation.y != 0.0 || translation.z != 0.0)
 		Camera.GetWorldMatrix().Translate(translation);
@@ -154,5 +85,7 @@ void GPlanetApplication::Update(float Delta)
 	Window.SetTitle(("Procedural planet demo " + std::format("{:.1f}", 1.0 / Delta)).c_str());
 	_updateCamera(Delta);
 
-	world.updateChunks(Scope, Camera);
+	Camera.GetWorldMatrix().LookAt(_debugCube->GetTransform().GetPosition());
+
+	// world.updateChunks(Scope, Camera);
 }
