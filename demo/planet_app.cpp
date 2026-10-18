@@ -7,7 +7,7 @@
 using namespace GEnums;
 
 GPlanetApplication::GPlanetApplication()
-	: IGApplication(SWindowParameters{ 1024, 720, "Procedural planet demo" })
+	: IGApplication(SWindowParameters{1024, 720, "Procedural planet demo"})
 {
 	Scope = Window.GetRenderer().GetScope();
 	engineListener.SetUserPointer(this);
@@ -21,21 +21,21 @@ GPlanetApplication::GPlanetApplication()
 
 	world._initDebug(Scope);
 
-	_debugCube = world.NewActor();
-	_debugCube->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, 100, 100, 100), GMeshMaterial::Create(Scope));
-	_debugCube->Translate(-glm::dvec3(100, 0, 400));
+	// _debugCube = world.NewActor();
+	// _debugCube->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, 100, 100, 100), GMeshMaterial::Create(Scope));
+	// _debugCube->Translate(-glm::dvec3(100, 0, 400));
 }
 
 GPlanetApplication::~GPlanetApplication()
 {
 }
 
-void GPlanetApplication::_wheelScroll(GEvents::ScrollDelta Event, void* Data)
+void GPlanetApplication::_wheelScroll(GEvents::ScrollDelta Event, void *Data)
 {
 	camera_speed += Event.y * 100.0;
 }
 
-void GPlanetApplication::_mouseMove(GEvents::MousePosition Event, void* Data)
+void GPlanetApplication::_mouseMove(GEvents::MousePosition Event, void *Data)
 {
 	if (mouseStates[GEnums::EMouse::Left] == GEnums::EAction::Press && !GUI::IsFocused())
 	{
@@ -44,20 +44,47 @@ void GPlanetApplication::_mouseMove(GEvents::MousePosition Event, void* Data)
 	}
 }
 
-void GPlanetApplication::_mousePress(GEvents::MousePress Event, void* Data)
+void GPlanetApplication::_mousePress(GEvents::MousePress Event, void *Data)
 {
 	mouseStates[Event.key] = Event.action;
 }
 
-void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void* Data)
+void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void *Data)
 {
 	keyStates[Event.key] = Event.action;
 }
 
+#define IsNotReleased(key) keyStates[key] != EAction::Release
+#define IsJustPressed(key) keyStates[key] == EAction::Press
+
 void GPlanetApplication::_updateCamera(float Delta)
 {
 	glm::vec3 translation(0.0);
-	
+
+	if (IsNotReleased(EKey::R))
+	{
+		camera_speed = DEFAULT_CAMERA_SPEED;
+		world._redrawDirtyChunks(Scope);
+	}
+
+	if (IsNotReleased(EKey::P))
+	{
+		glm::dvec3 pos = Camera.GetWorldMatrix().GetPosition();
+		// const double hand_length = 128.f;
+		// glm::vec3 fwd = Camera.GetWorldMatrix().GetForward() * hand_length;
+
+		auto c = world._atlass.GetChunkInPoint(pos.x, pos.y, pos.z);
+		if (c)
+		{
+			c->dirty = true;
+			// world._meshFactory.FillChunk(c);
+			auto it = c->VoxelArray.data();
+			for (int i = 0; i < c->VoxelArray.size(); i++){
+				it[i].type = 0;
+			}
+		}
+	}
+
 	if (IsNotReleased(EKey::W))
 		translation.z += camera_speed * Delta;
 
@@ -77,7 +104,9 @@ void GPlanetApplication::_updateCamera(float Delta)
 		translation.y -= camera_speed * Delta;
 
 	if (translation.x != 0.0 || translation.y != 0.0 || translation.z != 0.0)
-		Camera.GetWorldMatrix().Translate(translation);
+	{
+		Camera.GetWorldMatrix().Move(translation);
+	}
 }
 
 void GPlanetApplication::Update(float Delta)
@@ -85,7 +114,5 @@ void GPlanetApplication::Update(float Delta)
 	Window.SetTitle(("Procedural planet demo " + std::format("{:.1f}", 1.0 / Delta)).c_str());
 	_updateCamera(Delta);
 
-	Camera.GetWorldMatrix().LookAt(_debugCube->GetTransform().GetPosition());
-
-	// world.updateChunks(Scope, Camera);
+	world.updateChunks(Scope, Camera);
 }

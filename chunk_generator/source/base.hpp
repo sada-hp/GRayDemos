@@ -12,6 +12,7 @@ struct Chunk
 public:
 	std::vector<Voxel> VoxelArray;
 	int64_t x, y, z;
+	bool dirty;
 	~Chunk(){
 		VoxelArray.clear();
 	}

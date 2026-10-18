@@ -8,21 +8,29 @@
 #include "chunks.hpp"
 #include "dummy.hpp"
 
+#define VOXEL_SIZE 32.f
+#define CHUNK_ROW 16
+#define CHUNK_SIZE VOXEL_SIZE *CHUNK_ROW
+#define CHUNK_SQARE CHUNK_ROW *CHUNK_ROW
+#define CHUNK_CUBE CHUNK_ROW * CHUNK_ROW * CHUNK_ROW
+
 class GPlanetWorld : public IWorld
 {
 	constexpr static uint32_t debug_subdivisions = 512;
-	constexpr static double earth_radius = 6360.f * 1e3;
 
 	std::vector<std::shared_ptr<GActor>> _chunks;
 	entt::registry _registry;
 
 	std::shared_ptr<GMeshMaterial> _debugMaterial;
+	std::shared_ptr<GMeshMaterial> _debugMaterialWire;
 	std::shared_ptr<GActor> _debugChunkArea;
 	std::shared_ptr<GActor> _debugSphere;
-	ChunkAtlass _atlass;
-	ChunkMeshfactory _meshFactory;
 
 public:
+	ChunkAtlass _atlass;
+	ChunkMeshfactory _meshFactory;
+	constexpr static double earth_radius = 6360.f * 1e3;
+
 	GPlanetWorld();
 	virtual ~GPlanetWorld();
 
@@ -34,4 +42,5 @@ public:
 
 	void _initDebug(std::shared_ptr<RenderScope> Scope);
 	void _initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3, const GCamera &Camera);
+	void _redrawDirtyChunks(std::shared_ptr<RenderScope> Scope);
 };

@@ -1,4 +1,5 @@
 #include "iostream"
+#include "noize_loader.hpp"
 
 Chunk *WhiteNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
 {

@@ -25,10 +25,11 @@ public:
 	ChunkAtlass atlass;
 
 	std::shared_ptr<GActor> _debugCube;
-	float camera_speed = 1000.f;
+	const float DEFAULT_CAMERA_SPEED = 100.f;
+	float camera_speed = DEFAULT_CAMERA_SPEED;
 
 protected:
-	void _wheelScroll(GEvents::ScrollDelta Event, void* Data);
+	void _wheelScroll(GEvents::ScrollDelta Event, void* Data);	
 	void _mouseMove(GEvents::MousePosition Event, void* Data);
 	void _mousePress(GEvents::MousePress Event, void* Data);
 	void _keyPress(GEvents::KeyPress Event, void* Data);
