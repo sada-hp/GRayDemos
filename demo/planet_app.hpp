@@ -35,6 +35,7 @@ protected:
 	void _keyPress(GEvents::KeyPress Event, void* Data);
 
 protected:
+	void _destroyVoxel();
 	void _updateCamera(float Delta);
 	void Update(float Delta) override;
 

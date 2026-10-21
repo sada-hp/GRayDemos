@@ -4,7 +4,7 @@
 
 GPlanetWorld::GPlanetWorld()
 {
-	_atlass = ChunkAtlass(3, CHUNK_ROW, CHUNK_SIZE);
+	_atlass = ChunkAtlass(5, CHUNK_ROW, CHUNK_SIZE);
 	_meshFactory.Size = VOXEL_SIZE;
 }
 
@@ -91,6 +91,8 @@ void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::ve
 	{
 		MaterialDescriptor debugMaterial;
 		debugMaterial.SubmeshTextures.push_back(TexturePack{.Albedo = GVkImageFactory::SolidColor(Scope, COLOR(128, 255, 0))});
+		// debugMaterial.PolygonMode = VK_POLYGON_MODE_LINE;
+		// debugMaterial.CullMode = VK_CULL_MODE_NONE;
 
 		MaterialDescriptor debugMaterialWire;
 		debugMaterialWire.SubmeshTextures.push_back(TexturePack{.Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0, 255, 0))});
@@ -140,7 +142,7 @@ void GPlanetWorld::_redrawDirtyChunks(std::shared_ptr<RenderScope> Scope)
 		{
 			chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
 			chunk->Translate(glm::vec3{0, -6360.f * 1e3, 0});
-			chunk->Translate(glm::vec3{c->x, c->y, c->z} + glm::vec3{static_cast<int64_t>(CHUNK_SIZE / 2)});
+			chunk->Translate(glm::vec3{c->x, c->y, c->z});
 		}
 
 		// auto ca = _chunks.at(i);

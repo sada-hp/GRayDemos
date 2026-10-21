@@ -8,11 +8,12 @@
 #include "chunks.hpp"
 #include "dummy.hpp"
 
-#define VOXEL_SIZE 32.f
+#define VOXEL_SIZE 32.0
+#define VOXEL_RADIUS 22.62741699796952f
 #define CHUNK_ROW 16
-#define CHUNK_SIZE VOXEL_SIZE *CHUNK_ROW
-#define CHUNK_SQARE CHUNK_ROW *CHUNK_ROW
-#define CHUNK_CUBE CHUNK_ROW * CHUNK_ROW * CHUNK_ROW
+#define CHUNK_SIZE static_cast<double>(VOXEL_SIZE * CHUNK_ROW)
+#define CHUNK_SQARE static_cast<int>(CHUNK_ROW * CHUNK_ROW)
+#define CHUNK_CUBE static_cast<int>(CHUNK_ROW * CHUNK_ROW * CHUNK_ROW)
 
 class GPlanetWorld : public IWorld
 {
@@ -25,6 +26,7 @@ class GPlanetWorld : public IWorld
 	std::shared_ptr<GMeshMaterial> _debugMaterialWire;
 	std::shared_ptr<GActor> _debugChunkArea;
 	std::shared_ptr<GActor> _debugSphere;
+	std::shared_ptr<GActor> _debugCube;
 
 public:
 	ChunkAtlass _atlass;

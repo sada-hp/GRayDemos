@@ -21,9 +21,9 @@ GPlanetApplication::GPlanetApplication()
 
 	world._initDebug(Scope);
 
-	// _debugCube = world.NewActor();
-	// _debugCube->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, 100, 100, 100), GMeshMaterial::Create(Scope));
-	// _debugCube->Translate(-glm::dvec3(100, 0, 400));
+	_debugCube = world.NewActor();
+	_debugCube->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, VOXEL_SIZE / 2, VOXEL_SIZE / 2, VOXEL_SIZE / 2), GMeshMaterial::Create(Scope));
+	_debugCube->Translate(-glm::dvec3(100, 0, 400));
 }
 
 GPlanetApplication::~GPlanetApplication()
@@ -54,8 +54,94 @@ void GPlanetApplication::_keyPress(GEvents::KeyPress Event, void *Data)
 	keyStates[Event.key] = Event.action;
 }
 
-#define IsNotReleased(key) keyStates[key] != EAction::Release
-#define IsJustPressed(key) keyStates[key] == EAction::Press
+glm::dvec3 CheckVoxelIntersection(glm::dvec3 voxel_pos, glm::dvec3 camera_pos, glm::dvec3 dir, double &tBest)
+{
+	tBest = std::numeric_limits<double>::infinity();
+	int axis = -1;
+	bool positive = false;
+
+	glm::dvec3 l = voxel_pos;
+	glm::dvec3 h = voxel_pos + VOXEL_SIZE;
+
+	for (int i = 0; i < 3; i++)
+	{
+		if (dir[i] < 1e-9 && dir[i] > -1e-9)
+			continue;
+
+		bool pos = dir[i] > 0.0;
+		double t = ((pos ? h[i] : l[i]) - camera_pos[i]) / dir[i]; // t >= 0, т.к. точка внутри
+
+		if (t < tBest)
+		{
+			tBest = t;
+			axis = i;
+			positive = pos;
+		}
+	}
+	static const glm::dvec3 faces[3][2] = {
+		{glm::dvec3{-1, 0, 0}, glm::dvec3{1, 0, 0}},
+		{glm::dvec3{0, -1, 0}, glm::dvec3{0, 1, 0}},
+		{glm::dvec3{0, 0, -1}, glm::dvec3{0, 0, 1}},
+	};
+
+	return faces[axis][positive];
+}
+
+void GPlanetApplication::_destroyVoxel()
+{
+	glm::dvec3 pos = Camera.GetWorldMatrix().GetPosition();
+	glm::dvec3 fwd = Camera.GetWorldMatrix().GetForward();
+
+	// глобальная позиция вокселя
+	glm::dvec3 globalVoxelPos = glm::floor((pos / VOXEL_SIZE)) * VOXEL_SIZE;
+	// глобальная позиция чанка
+	glm::dvec3 globalChunkPos = glm::floor((pos / CHUNK_SIZE)) * CHUNK_SIZE;
+	// локальная позиция чанка
+	glm::dvec3 voxelPosToCheck = glm::floor((globalVoxelPos - globalChunkPos) / VOXEL_SIZE);
+
+	const int maxReach = 10;
+	double t = 0;
+	int reach = 1;
+
+	while (reach <= maxReach)
+	{
+		// Сторона с которой столкнулся смотрящий из камеры вектор
+		auto fc = CheckVoxelIntersection(globalVoxelPos, pos + fwd * t, fwd, t);
+		globalVoxelPos += fc * VOXEL_SIZE;
+
+		// Чанк, в котором находится воксель
+		auto c = world._atlass.GetChunkInPoint(globalVoxelPos.x, globalVoxelPos.y, globalVoxelPos.z);
+		if (c)
+		{
+			voxelPosToCheck += fc;
+			glm::dvec3 pvp = voxelPosToCheck;
+			for (int fc_i = 0; fc_i < 3; fc_i++)
+			{
+				if (voxelPosToCheck[fc_i] < 0)
+					voxelPosToCheck[fc_i] += CHUNK_ROW;
+				if (voxelPosToCheck[fc_i] >= CHUNK_ROW)
+					voxelPosToCheck[fc_i] -= CHUNK_ROW;
+			}
+			int i = voxelPosToCheck.x + voxelPosToCheck.y * CHUNK_ROW + voxelPosToCheck.z * CHUNK_SQARE;
+
+			if (c->VoxelArray[i].type == 0)
+			{
+				reach++;
+				continue;
+			}
+
+			c->dirty = true;
+			c->VoxelArray[i].type = 0;
+
+			world._redrawDirtyChunks(Scope);
+			break;
+		}
+		else
+		{
+			break;
+		}
+	}
+}
 
 void GPlanetApplication::_updateCamera(float Delta)
 {
@@ -67,22 +153,9 @@ void GPlanetApplication::_updateCamera(float Delta)
 		world._redrawDirtyChunks(Scope);
 	}
 
-	if (IsNotReleased(EKey::P))
+	if (mouseStates[EMouse::Middle] != EAction::Release)
 	{
-		glm::dvec3 pos = Camera.GetWorldMatrix().GetPosition();
-		// const double hand_length = 128.f;
-		// glm::vec3 fwd = Camera.GetWorldMatrix().GetForward() * hand_length;
-
-		auto c = world._atlass.GetChunkInPoint(pos.x, pos.y, pos.z);
-		if (c)
-		{
-			c->dirty = true;
-			// world._meshFactory.FillChunk(c);
-			auto it = c->VoxelArray.data();
-			for (int i = 0; i < c->VoxelArray.size(); i++){
-				it[i].type = 0;
-			}
-		}
+		_destroyVoxel();
 	}
 
 	if (IsNotReleased(EKey::W))

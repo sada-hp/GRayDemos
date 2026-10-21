@@ -29,8 +29,8 @@ Chunk *WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, st
 	for (uint32_t i = 0; i < _chunkSide * _chunkSide * _chunkSide; i++)
 	{
 		params.x = c->x + (i & (_chunkSide - 1));
-		params.z = c->z + (i >> (4 * 2));
 		params.y = c->y + ((i >> 4) & (_chunkSide - 1));
+		params.z = c->z + (i >> (4 * 2));
 
 		MurmurHash3_x86_32(&params, sizeof(params), _seed, &params.out);
 

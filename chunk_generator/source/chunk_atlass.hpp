@@ -35,7 +35,7 @@ public:
 	};
 
 	const std::vector<Chunk *> *GetChunks() { return &_chunks; }
-
+	
 	Chunk *GetChunkInPoint(float x, float y, float z)
 	{
 		for (auto c : _chunks)
