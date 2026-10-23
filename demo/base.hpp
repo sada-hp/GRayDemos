@@ -1,6 +1,15 @@
 #pragma once
+#include "World/actor.hpp"
 #include <vector>
 #include <memory>
+
+#define VOXEL_SIZE 32.0
+#define VOXEL_RADIUS 22.62741699796952f
+#define CHUNK_ROW 16
+#define CHUNK_TOWER 3
+#define CHUNK_SIZE static_cast<double>(VOXEL_SIZE * CHUNK_ROW)
+#define CHUNK_SQARE static_cast<int>(CHUNK_ROW * CHUNK_ROW)
+#define CHUNK_CUBE static_cast<int>(CHUNK_ROW * CHUNK_ROW * CHUNK_ROW)
 
 struct Voxel {
 public:
@@ -10,8 +19,9 @@ public:
 struct Chunk
 {
 public:
+	std::shared_ptr<GActor> Mesh;
 	std::vector<Voxel> VoxelArray;
-	int64_t x, y, z;
+	// int64_t x, y, z;
 	bool dirty;
 	~Chunk(){
 		VoxelArray.clear();

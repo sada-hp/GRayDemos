@@ -10,7 +10,7 @@ GPlanetWorld::GPlanetWorld()
 
 GPlanetWorld::~GPlanetWorld()
 {
-	_chunks.clear();
+	// _chunks.clear();
 	_debugSphere = nullptr;
 }
 
@@ -77,20 +77,24 @@ void GPlanetWorld::updateChunks(std::shared_ptr<RenderScope> Scope, const GCamer
 		prevPos.y = (floor(camPos.y / (CHUNK_SIZE)) * (CHUNK_SIZE));
 		prevPos.z = (floor(camPos.z / (CHUNK_SIZE)) * (CHUNK_SIZE));
 
-		_initVoxels(Scope, prevPos, Camera);
+		_initVoxels(Scope, prevPos);
+		// _atlass.RecalculateDelta(prevPos.x, prevPos.y, prevPos.z);
+		// _redrawDirtyChunks(Scope);
 	}
 #endif
 }
 
-void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3 position, const GCamera &Camera)
+void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3 position)
 {
-	_chunks.clear();
+	// _chunks.clear();
 	_atlass.RecalculateAll(position.x, position.y, position.z);
 
 	if (!_debugMaterial || !_debugMaterialWire)
 	{
 		MaterialDescriptor debugMaterial;
 		debugMaterial.SubmeshTextures.push_back(TexturePack{.Albedo = GVkImageFactory::SolidColor(Scope, COLOR(128, 255, 0))});
+		// debugMaterial.PolygonMode = VK_POLYGON_MODE_LINE;
+		// debugMaterial.CullMode = VK_CULL_MODE_NONE;
 
 		MaterialDescriptor debugMaterialWire;
 		debugMaterialWire.SubmeshTextures.push_back(TexturePack{.Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0, 255, 0))});
@@ -100,7 +104,7 @@ void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::ve
 		_debugMaterialWire = GMeshMaterial::Create(Scope, debugMaterialWire);
 	}
 
-	for (auto c : *_atlass.GetChunks())
+	for (auto [p, c] : *_atlass.GetChunks())
 	{
 		auto mesh = _meshFactory.ChunkToMesh(Scope, c, earth_radius);
 
@@ -108,15 +112,16 @@ void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::ve
 		chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
 		chunk->AddComponent<Chunk *>(c);
 		chunk->Translate(glm::vec3{0, -6360.f * 1e3, 0});
-		chunk->Translate(glm::vec3{c->x, c->y, c->z});
+		chunk->Translate(glm::vec3{p.x, p.y, p.z});
 
 		std::shared_ptr<GActor> debug_chunk = NewActor();
 		debug_chunk->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE), _debugMaterialWire);
 		debug_chunk->Translate(glm::vec3{0, -6360.f * 1e3, 0});
-		debug_chunk->Translate(glm::vec3{c->x, c->y, c->z} + glm::vec3{static_cast<int64_t>(CHUNK_SIZE / 2)});
+		debug_chunk->Translate(glm::vec3{p.x, p.y, p.z} + glm::vec3{static_cast<int64_t>(CHUNK_SIZE / 2)});
 
-		_chunks.push_back(chunk);
+		// _chunks.push_back(chunk);
 		// _chunks.push_back(debug_chunk);
+		c->Mesh = chunk;
 		c->dirty = false;
 	}
 }
@@ -127,24 +132,22 @@ void GPlanetWorld::_redrawDirtyChunks(std::shared_ptr<RenderScope> Scope)
 	// номкрам мешей в массиве для отрисовки
 	auto chunkList = *_atlass.GetChunks();
 
-	for (int i = 0; i < chunkList.size(); i++)
+	for (auto [p, c] : *_atlass.GetChunks())
 	{
-		Chunk *c = chunkList[i];
 		if (!c->dirty)
 			continue;
 
 		auto mesh = _meshFactory.ChunkToMesh(Scope, c, earth_radius);
 
-		std::shared_ptr<GActor> chunk = NewActor();
 		if (mesh)
 		{
+			std::shared_ptr<GActor> chunk = NewActor();
 			chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
 			chunk->Translate(glm::vec3{0, -6360.f * 1e3, 0});
-			chunk->Translate(glm::vec3{c->x, c->y, c->z} + glm::vec3{static_cast<int64_t>(CHUNK_SIZE / 2)});
+			chunk->Translate(glm::vec3{p.x, p.y, p.z});
+			c->Mesh = chunk;
 		}
 
-		// auto ca = _chunks.at(i);
-		_chunks[i] = chunk;
 		c->dirty = false;
 	}
 }

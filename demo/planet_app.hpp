@@ -22,7 +22,6 @@ public:
 
 	GEventListener engineListener;
 	GPlanetWorld world;
-	ChunkAtlass atlass;
 
 	std::shared_ptr<GActor> _debugCube;
 	const float DEFAULT_CAMERA_SPEED = 100.f;
@@ -35,6 +34,7 @@ protected:
 	void _keyPress(GEvents::KeyPress Event, void* Data);
 
 protected:
+	void _destroyVoxel();
 	void _updateCamera(float Delta);
 	void Update(float Delta) override;
 

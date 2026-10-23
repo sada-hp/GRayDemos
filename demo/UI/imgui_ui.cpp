@@ -2,8 +2,9 @@
 
 #include "imgui/imgui_impl_vulkan.h"
 #include "imgui/imgui_impl_glfw.h"
+#include "planet_app.hpp"
 
-GUI::GUI(std::shared_ptr<RenderScope> Scope, const GVkSharedResources& Resources, GWindow& Window)
+GUI::GUI(std::shared_ptr<RenderScope> Scope, const GVkSharedResources &Resources, GWindow &Window)
 	: IRenderStage(Scope, VK_QUEUE_GRAPHICS_BIT)
 {
 	ImContext = ImGui::CreateContext();
@@ -13,7 +14,7 @@ GUI::GUI(std::shared_ptr<RenderScope> Scope, const GVkSharedResources& Resources
 	RPDesc.AddAttachmentLoadOp(Resources.FinalTarget->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	RenderPass = RPDesc.Construct(Scope);
 
-	Framebuffer = std::make_shared<GVkFramebuffer>(Scope, RenderPass, std::vector{ Resources.FinalTarget });
+	Framebuffer = std::make_shared<GVkFramebuffer>(Scope, RenderPass, std::vector{Resources.FinalTarget});
 
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.ApiVersion = VK_API_VERSION_1_3;
@@ -40,9 +41,9 @@ GUI::~GUI()
 	ImGui::DestroyContext(ImContext);
 }
 
-void GUI::_weatherControls(IWorld& World)
+void GUI::_weatherControls(IWorld &World)
 {
-	static float _sun = 1.f;
+	static float _sun = 0.16f;
 	const glm::vec3 top = glm::normalize(glm::vec3(1.0, 1.0, 1.0));
 	const glm::vec3 bot = glm::normalize(glm::vec3(1.0, 0.0, 0.0));
 
@@ -50,22 +51,29 @@ void GUI::_weatherControls(IWorld& World)
 	World.SetSunDirection(glm::mix(bot, top, _sun));
 }
 
-void GUI::_cameraPos(const GCamera& Camera, const IWorld& World){
+void GUI::_cameraPos(const GCamera &Camera, const IWorld &World)
+{
 	auto cp = Camera.GetLocalMatrix().GetPosition();
 	ImGui::Text("%3.f %3.f %3.f", cp.x, cp.y, cp.z);
+
+	glm::dvec3 pos = Camera.GetWorldMatrix().GetPosition();
+
+	glm::dvec3 globalVoxelPos = glm::floor((pos / static_cast<double>(CHUNK_ROW))) * static_cast<double>(CHUNK_ROW);
+	glm::dvec3 globalChunkPos = glm::floor((pos / CHUNK_SIZE)) * CHUNK_SIZE;
+	glm::dvec3 voxelPosToCheck = glm::floor((globalVoxelPos - globalChunkPos) / static_cast<double>(VOXEL_SIZE));
+	ImGui::Text("%3.2f %3.2f %3.2f", voxelPosToCheck.x, voxelPosToCheck.y, voxelPosToCheck.z);
 }
 
-
-void GUI::Execute(const GCamera& Camera, const IWorld& World)
+void GUI::Execute(const GCamera &Camera, const IWorld &World)
 {
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
-	
+
 	ImGui::Begin("Debug window", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::SetWindowPos(ImVec2{ 0, 0 });
-	_weatherControls(const_cast<IWorld&>(World));
-	_cameraPos(const_cast<GCamera&>(Camera), const_cast<IWorld&>(World));
+	ImGui::SetWindowPos(ImVec2{0, 0});
+	_weatherControls(const_cast<IWorld &>(World));
+	_cameraPos(const_cast<GCamera &>(Camera), const_cast<IWorld &>(World));
 	ImGui::End();
 
 	ImGui::Render();

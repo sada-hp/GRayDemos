@@ -6,25 +6,20 @@
 
 #include "Materials/mesh_material.hpp"
 #include "chunks.hpp"
-#include "dummy.hpp"
-
-#define VOXEL_SIZE 32.f
-#define CHUNK_ROW 16
-#define CHUNK_SIZE VOXEL_SIZE *CHUNK_ROW
-#define CHUNK_SQARE CHUNK_ROW *CHUNK_ROW
-#define CHUNK_CUBE CHUNK_ROW * CHUNK_ROW * CHUNK_ROW
+#include "chunk_atlass.hpp"
 
 class GPlanetWorld : public IWorld
 {
 	constexpr static uint32_t debug_subdivisions = 512;
 
-	std::vector<std::shared_ptr<GActor>> _chunks;
+	// std::vector<std::shared_ptr<GActor>> _chunks;
 	entt::registry _registry;
 
 	std::shared_ptr<GMeshMaterial> _debugMaterial;
 	std::shared_ptr<GMeshMaterial> _debugMaterialWire;
 	std::shared_ptr<GActor> _debugChunkArea;
 	std::shared_ptr<GActor> _debugSphere;
+	std::shared_ptr<GActor> _debugCube;
 
 public:
 	ChunkAtlass _atlass;
@@ -37,10 +32,11 @@ public:
 	void GetDrawableObjects(std::vector<std::pair<const GDrawable *, const EllipsoidMatrix *>> &objects) const override;
 	std::shared_ptr<GActor> NewActor();
 
-	uint32_t NumChunks() const { return _chunks.size(); }
+	// uint32_t NumChunks() const { return _chunks.size(); }
 	void updateChunks(std::shared_ptr<RenderScope> Scope, const GCamera &Camera);
 
 	void _initDebug(std::shared_ptr<RenderScope> Scope);
-	void _initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3, const GCamera &Camera);
+	void _initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3);
 	void _redrawDirtyChunks(std::shared_ptr<RenderScope> Scope);
+	// void _redrawNewPosition(std::shared_ptr<RenderScope> Scope);
 };

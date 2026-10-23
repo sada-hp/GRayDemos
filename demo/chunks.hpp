@@ -1,6 +1,6 @@
 #pragma once
+#include "base.hpp"
 #include "Factories/VkMeshFactory.hpp"
-#include "dummy.hpp"
 
 class ChunkMeshfactory {
 private:
