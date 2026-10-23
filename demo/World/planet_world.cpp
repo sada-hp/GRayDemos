@@ -4,7 +4,7 @@
 
 GPlanetWorld::GPlanetWorld()
 {
-	_atlass = ChunkAtlass(3, CHUNK_ROW, CHUNK_SIZE);
+	_atlass = ChunkAtlass(5, CHUNK_ROW, CHUNK_SIZE);
 	_meshFactory.Size = VOXEL_SIZE;
 }
 
