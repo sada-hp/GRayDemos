@@ -11,24 +11,24 @@ class ChunkAtlass
 
 private:
 	/// количество вокселей на одной стороне
-	uint32_t _chunk_side;
+	int32_t _chunk_side;
 
 	/// Размер одной стороны
-	uint32_t _chunk_size;
+	int32_t _chunk_size;
 
 	/// Радиус отображаемых чанков
-	uint32_t _visible_radius;
+	int32_t _visible_radius;
 
 	std::unique_ptr<IChunkLoader> _loader;
 
-	int64_t _center[3] = {0, 0, 0};
+	glm::ivec3 _center = glm::ivec3{0};
 
 	std::vector<GActor *> _chunkMeshes = {};
 	// std::vector<Chunk *> _chunks = {};
 	std::unordered_map<glm::ivec3, Chunk *> _chunks = {};
 
 public:
-	ChunkAtlass(const uint32_t visible_radius = 2, const uint32_t chunk_side = 16, uint32_t chunk_size = 32)
+	ChunkAtlass(const int32_t visible_radius = 2, const int32_t chunk_side = 16, int32_t chunk_size = 32)
 	{
 		_loader = std::make_unique<WhiteNoiseLoader>(0xDEADBEEF, chunk_side);
 
@@ -37,7 +37,7 @@ public:
 		_chunk_size = chunk_size;
 	};
 
-	const std::unordered_map<glm::ivec3, Chunk *> *GetChunks() { return &_chunks; }
+	const std::unordered_map<glm::ivec3, Chunk *> *GetChunks() const { return &_chunks; }
 
 	Chunk *GetChunkInPoint(glm::dvec3 pos)
 	{
@@ -49,5 +49,13 @@ public:
 	}
 
 	void RecalculateAll(float c_x, float c_y, float c_z);
-	void RecalculateDelta(float c_x, float c_y, float c_z);
+	void RecalculateDelta(glm::dvec3 pos);
+
+	static glm::ivec3 ChunkGlobalId(const glm::dvec3 &pos)
+	{
+		int x = static_cast<int>(floor(pos.x / (CHUNK_SIZE)) * (CHUNK_SIZE));
+		int y = static_cast<int>(floor(pos.y / (CHUNK_SIZE)) * (CHUNK_SIZE));
+		int z = static_cast<int>(floor(pos.z / (CHUNK_SIZE)) * (CHUNK_SIZE));
+		return glm::ivec3{x, y, z};
+	}
 };

@@ -2,9 +2,11 @@
 #include "Factories/VkImageFactory.hpp"
 #include "Factories/VkMeshFactory.hpp"
 
+glm::ivec3 prevPos = {0, 6360.f * 1e3, 0};
+
 GPlanetWorld::GPlanetWorld()
 {
-	_atlass = ChunkAtlass(5, CHUNK_ROW, CHUNK_SIZE);
+	_atlass = ChunkAtlass(10, CHUNK_ROW, CHUNK_SIZE);
 	_meshFactory.Size = VOXEL_SIZE;
 }
 
@@ -26,7 +28,6 @@ std::shared_ptr<GActor> GPlanetWorld::NewActor()
 	return std::make_shared<GActor>(_registry);
 }
 
-glm::vec3 prevPos = {-INFINITY, -INFINITY, -INFINITY};
 
 void GPlanetWorld::updateChunks(std::shared_ptr<RenderScope> Scope, const GCamera &Camera)
 {
@@ -65,21 +66,15 @@ void GPlanetWorld::updateChunks(std::shared_ptr<RenderScope> Scope, const GCamer
 	auto Mesh = GVkMeshFactory::Mesh(Scope, vertices, indices);
 	_debugChunkArea->AddComponent<GDrawable>(Mesh, _debugMaterial);
 #else
-	glm::dvec3 camPos = Camera.GetWorldMatrix().GetPosition();
+		
+	glm::ivec3 camPos = ChunkAtlass::ChunkGlobalId(Camera.GetWorldMatrix().GetPosition());
 
-	bool b_x = camPos.x > prevPos.x + (CHUNK_SIZE) || camPos.x < prevPos.x;
-	bool b_y = camPos.y > prevPos.y + (CHUNK_SIZE) || camPos.y < prevPos.y;
-	bool b_z = camPos.z > prevPos.z + (CHUNK_SIZE) || camPos.z < prevPos.z;
-
-	if (b_x || b_y || b_z)
+	if (camPos != prevPos)
 	{
-		prevPos.x = (floor(camPos.x / (CHUNK_SIZE)) * (CHUNK_SIZE));
-		prevPos.y = (floor(camPos.y / (CHUNK_SIZE)) * (CHUNK_SIZE));
-		prevPos.z = (floor(camPos.z / (CHUNK_SIZE)) * (CHUNK_SIZE));
-
-		_initVoxels(Scope, prevPos);
-		// _atlass.RecalculateDelta(prevPos.x, prevPos.y, prevPos.z);
-		// _redrawDirtyChunks(Scope);
+		prevPos = camPos;
+		// _initVoxels(Scope, prevPos);
+		_atlass.RecalculateDelta(prevPos);
+		_redrawDirtyChunks(Scope);
 	}
 #endif
 }
@@ -128,7 +123,7 @@ void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::ve
 
 void GPlanetWorld::_redrawDirtyChunks(std::shared_ptr<RenderScope> Scope)
 {
-	// Подразумеваем, что номера чанков здесь в соответсвуют 
+	// Подразумеваем, что номера чанков здесь в соответсвуют
 	// номкрам мешей в массиве для отрисовки
 	auto chunkList = *_atlass.GetChunks();
 

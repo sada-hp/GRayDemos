@@ -1,5 +1,6 @@
 #pragma once
 #include "imgui/imgui.h"
+#include "World/planet_world.hpp"
 #include "Engine/window.hpp"
 #include "VulkanAPI/scope.hpp"
 #include "VulkanAPI/command_buffer.hpp"
@@ -12,7 +13,7 @@ class GUI : public IRenderStage
 
 private:
 	void _weatherControls(IWorld& World);
-	void _cameraPos(const GCamera& Camera, const IWorld& World);
+	void _cameraPos(const GCamera& Camera, const GPlanetWorld& World);
 public:
 	GUI(std::shared_ptr<RenderScope> Scope, const GVkSharedResources& Resources, GWindow& Window);
 	~GUI();
