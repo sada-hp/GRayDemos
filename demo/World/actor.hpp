@@ -32,6 +32,12 @@ public:
 	}
 
 	EllipsoidMatrix& GetTransform();
+
+	void SetPosition(const glm::dvec3& offset);
+	void SetPosition(double x, double y, double z);
+
 	void Translate(const glm::dvec3& offset);
+	void Translate(double x, double y, double z);
+
 	void Rotate(double P, double Y, double R);
 };

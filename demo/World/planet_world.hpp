@@ -36,7 +36,7 @@ public:
 	void updateChunks(std::shared_ptr<RenderScope> Scope, const GCamera &Camera);
 
 	void _initDebug(std::shared_ptr<RenderScope> Scope);
-	void _initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3);
+	void _initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3&);
 	void _redrawDirtyChunks(std::shared_ptr<RenderScope> Scope);
 	// void _redrawNewPosition(std::shared_ptr<RenderScope> Scope);
 };

@@ -79,7 +79,7 @@ void GPlanetWorld::updateChunks(std::shared_ptr<RenderScope> Scope, const GCamer
 #endif
 }
 
-void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3 position)
+void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3& position)
 {
 	// _chunks.clear();
 	_atlass.RecalculateAll(position.x, position.y, position.z);
@@ -106,13 +106,12 @@ void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::ve
 		std::shared_ptr<GActor> chunk = NewActor();
 		chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
 		chunk->AddComponent<Chunk *>(c);
-		chunk->Translate(glm::vec3{0, -6360.f * 1e3, 0});
-		chunk->Translate(glm::vec3{p.x, p.y, p.z});
+		chunk->SetPosition(p);
 
-		std::shared_ptr<GActor> debug_chunk = NewActor();
-		debug_chunk->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE), _debugMaterialWire);
-		debug_chunk->Translate(glm::vec3{0, -6360.f * 1e3, 0});
-		debug_chunk->Translate(glm::vec3{p.x, p.y, p.z} + glm::vec3{static_cast<int64_t>(CHUNK_SIZE / 2)});
+		//std::shared_ptr<GActor> debug_chunk = NewActor();
+		//debug_chunk->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE), _debugMaterialWire);
+		//debug_chunk->Translate(glm::vec3{0, -GEllipsoid::Rg, 0});
+		//debug_chunk->Translate(glm::vec3{p.x, p.y, p.z} + glm::vec3{static_cast<int64_t>(CHUNK_SIZE / 2)});
 
 		// _chunks.push_back(chunk);
 		// _chunks.push_back(debug_chunk);
@@ -138,8 +137,7 @@ void GPlanetWorld::_redrawDirtyChunks(std::shared_ptr<RenderScope> Scope)
 		{
 			std::shared_ptr<GActor> chunk = NewActor();
 			chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
-			chunk->Translate(glm::vec3{0, -6360.f * 1e3, 0});
-			chunk->Translate(glm::vec3{p.x, p.y, p.z});
+			chunk->SetPosition(p);
 			c->Mesh = chunk;
 		}
 
