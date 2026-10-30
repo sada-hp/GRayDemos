@@ -8,7 +8,7 @@ GPlanetWorld::GPlanetWorld(std::shared_ptr<RenderScope> InScope)
 	: IWorld(InScope)
 {
 	_atlass = ChunkAtlass(10, CHUNK_ROW, CHUNK_SIZE);
-	_meshFactory.Size = VOXEL_SIZE;
+	// _meshFactory.Size = VOXEL_SIZE;
 }
 
 GPlanetWorld::~GPlanetWorld()

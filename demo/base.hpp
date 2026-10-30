@@ -5,7 +5,8 @@
 
 #define VOXEL_SIZE 32.0
 #define VOXEL_RADIUS 22.62741699796952f
-#define CHUNK_ROW 16
+#define CHUNK_ROW_BYTES 4
+#define CHUNK_ROW (1 << CHUNK_ROW_BYTES)
 #define CHUNK_TOWER 3
 #define CHUNK_SIZE static_cast<double>(VOXEL_SIZE * CHUNK_ROW)
 #define CHUNK_SQARE static_cast<int>(CHUNK_ROW * CHUNK_ROW)

@@ -23,19 +23,23 @@ void ChunkMeshfactory::FillChunk(Chunk* chunk) const {
 
 std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope> Scope, Chunk* chunk, double earth_radius) const
 {
-	const glm::vec3 dirs[] = {
+	const glm::ivec3 dirs[] = {
 		{1,0,0}, {-1,0,0}, {0,1,0}, {0,-1,0}, {0,0,1}, {0,0,-1}
 	};
-	const glm::vec3 vertexPoints[] = {
-		{1,0,0}, {1,1,0}, {1,1,1}, {1,1,1}, {1,0,1}, {1,0,0},
-		{0,0,0}, {0,0,1}, {0,1,1}, {0,1,1}, {0,1,0}, {0,0,0},
-		{0,1,0}, {0,1,1}, {1,1,1}, {1,1,1}, {1,1,0}, {0,1,0},
-		{0,0,0}, {1,0,0}, {1,0,1}, {1,0,1}, {0,0,1}, {0,0,0},
-		{0,0,1}, {1,0,1}, {1,1,1}, {1,1,1}, {0,1,1}, {0,0,1},
-		{0,0,0}, {0,1,0}, {1,1,0}, {1,1,0}, {1,0,0}, {0,0,0},
+	const glm::dvec3 vertexPoints[][4] = {
+		{{1,0,0}, {1,1,0}, /*{1,1,1},*/ {1,1,1}, {1,0,1}, /*{1,0,0},*/},
+		{{0,0,0}, {0,0,1}, /*{0,1,1},*/ {0,1,1}, {0,1,0}, /*{0,0,0},*/},
+		{{0,1,0}, {0,1,1}, /*{1,1,1},*/ {1,1,1}, {1,1,0}, /*{0,1,0},*/},
+		{{0,0,0}, {1,0,0}, /*{1,0,1},*/ {1,0,1}, {0,0,1}, /*{0,0,0},*/},
+		{{0,0,1}, {1,0,1}, /*{1,1,1},*/ {1,1,1}, {0,1,1}, /*{0,0,1},*/},
+		{{0,0,0}, {0,1,0}, /*{1,1,0},*/ {1,1,0}, {1,0,0}, /*{0,0,0},*/},
 	};
 
 	auto vertices = std::vector<MeshVertex>();
+	auto indices = std::vector<uint16_t>();
+	
+	uint16_t indicesTmp[6] = {0};
+	uint16_t vertexIndex = 0;
 	int vertexOffset = 0;
 
 	for (int chunk_it = 0; chunk_it < ChunkSize; chunk_it++) {
@@ -46,37 +50,39 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 
 		if (cur->type == 0) continue;
 		for (int side_it = 0; side_it < 6; side_it++) {
-			glm::vec3 dir = dirs[side_it];
-			int _x = x + dir.x;
-			int _z = z + dir.z;
-			int _y = y + dir.y;
+			glm::ivec3 dir = dirs[side_it];
+			glm::ivec3 dir_p = dir + glm::ivec3{x,y,z};
 
-			Voxel ch = { 0 };
+			Voxel vx = { 0 };
 			/// TODO: Проверка соседних чанков
-			if (_x >= ChunkSide || _x < 0) ch.type = 0;
-			else if (_z >= ChunkSide || _z < 0) ch.type = 0;
-			else if (_y >= ChunkSide || _y < 0) ch.type = 0;
+			if (dir_p.x >= ChunkSide || dir_p.x < 0) vx.type = 0;
+			else if (dir_p.z >= ChunkSide || dir_p.z < 0) vx.type = 0;
+			else if (dir_p.y >= ChunkSide || dir_p.y < 0) vx.type = 0;
 			else {
-				ch = (chunk->VoxelArray[_x + _y * ChunkSide + _z * ChunkSide * ChunkSide]);
+				vx = (chunk->VoxelArray.data()[dir_p.x + dir_p.y * ChunkSide + dir_p.z * ChunkSide * ChunkSide]);
 			}
 
-			if (ch.type != 0) continue;
+			if (vx.type != 0) continue;
 
-			for (int vert_it = 0; vert_it < 6; vert_it++) {
+			for (int vert_it = 0; vert_it < 4; vert_it++) {
 				MeshVertex vertex{ };
-				vertex.position = glm::dvec3{
-					Size * (x + vertexPoints[side_it * 6 + vert_it].x),
-					Size * (y + vertexPoints[side_it * 6 + vert_it].y),
-					Size * (z + vertexPoints[side_it * 6 + vert_it].z),
-				} ;
+				vertex.position = static_cast<double>(Size) * (glm::dvec3{x,y,z} + vertexPoints[side_it][vert_it]);
 				vertex.normal = dir;
 				vertices.push_back(vertex);
 			}
+			indicesTmp[0] = vertexIndex + 0;
+			indicesTmp[1] = vertexIndex + 1;
+			indicesTmp[2] = vertexIndex + 2;
+			indicesTmp[3] = vertexIndex + 2;
+			indicesTmp[4] = vertexIndex + 3;
+			indicesTmp[5] = vertexIndex + 0;
+			indices.insert(indices.end(), std::begin(indicesTmp), std::end(indicesTmp));
+			vertexIndex += 4;
 		}
 	}
 
 	if (vertices.size() == 0)
 		return nullptr;
-	return std::shared_ptr<IMesh>(new GVkMesh<MeshVertex>(Scope, vertices));
+	return std::shared_ptr<IMesh>(new GVkMesh<MeshVertex>(Scope, vertices, indices));
 }
 
