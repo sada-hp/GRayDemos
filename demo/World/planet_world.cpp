@@ -4,7 +4,8 @@
 
 glm::ivec3 prevPos = {0, 6360.f * 1e3, 0};
 
-GPlanetWorld::GPlanetWorld()
+GPlanetWorld::GPlanetWorld(std::shared_ptr<RenderScope> InScope)
+	: IWorld(InScope)
 {
 	_atlass = ChunkAtlass(10, CHUNK_ROW, CHUNK_SIZE);
 	_meshFactory.Size = VOXEL_SIZE;
@@ -16,20 +17,7 @@ GPlanetWorld::~GPlanetWorld()
 	_debugSphere = nullptr;
 }
 
-void GPlanetWorld::GetDrawableObjects(std::vector<std::pair<const GDrawable *, const EllipsoidMatrix *>> &objects) const
-{
-	auto view = _registry.view<EllipsoidMatrix, GDrawable>();
-	for (const auto &[ent, matrix, drawable] : view.each())
-		objects.emplace_back(&drawable, &matrix);
-}
-
-std::shared_ptr<GActor> GPlanetWorld::NewActor()
-{
-	return std::make_shared<GActor>(_registry);
-}
-
-
-void GPlanetWorld::updateChunks(std::shared_ptr<RenderScope> Scope, const GCamera &Camera)
+void GPlanetWorld::updateChunks(const GCamera &Camera)
 {
 	// return;
 #if 0
@@ -74,12 +62,12 @@ void GPlanetWorld::updateChunks(std::shared_ptr<RenderScope> Scope, const GCamer
 		prevPos = camPos;
 		// _initVoxels(Scope, prevPos);
 		_atlass.RecalculateDelta(prevPos);
-		_redrawDirtyChunks(Scope);
+		_redrawDirtyChunks();
 	}
 #endif
 }
 
-void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::vec3& position)
+void GPlanetWorld::_initVoxels(const glm::vec3& position)
 {
 	// _chunks.clear();
 	_atlass.RecalculateAll(position.x, position.y, position.z);
@@ -101,7 +89,7 @@ void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::ve
 
 	for (auto [p, c] : *_atlass.GetChunks())
 	{
-		auto mesh = _meshFactory.ChunkToMesh(Scope, c, earth_radius);
+		auto mesh = _meshFactory.ChunkToMesh(Scope, c, GEllipsoid::Rg);
 
 		std::shared_ptr<GActor> chunk = NewActor();
 		chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
@@ -120,7 +108,7 @@ void GPlanetWorld::_initVoxels(std::shared_ptr<RenderScope> Scope, const glm::ve
 	}
 }
 
-void GPlanetWorld::_redrawDirtyChunks(std::shared_ptr<RenderScope> Scope)
+void GPlanetWorld::_redrawDirtyChunks()
 {
 	// Подразумеваем, что номера чанков здесь в соответсвуют
 	// номкрам мешей в массиве для отрисовки
@@ -131,7 +119,7 @@ void GPlanetWorld::_redrawDirtyChunks(std::shared_ptr<RenderScope> Scope)
 		if (!c->dirty)
 			continue;
 
-		auto mesh = _meshFactory.ChunkToMesh(Scope, c, earth_radius);
+		auto mesh = _meshFactory.ChunkToMesh(Scope, c, GEllipsoid::Rg);
 
 		if (mesh)
 		{
@@ -145,9 +133,9 @@ void GPlanetWorld::_redrawDirtyChunks(std::shared_ptr<RenderScope> Scope)
 	}
 }
 
-void GPlanetWorld::_initDebug(std::shared_ptr<RenderScope> Scope)
+void GPlanetWorld::_initDebug()
 {
-	auto mesh = GVkMeshFactory::QuadrilateralSphere(Scope, earth_radius, debug_subdivisions);
+	auto mesh = GVkMeshFactory::QuadrilateralSphere(Scope, GEllipsoid::Rg, debug_subdivisions);
 
 	MaterialDescriptor debugMaterial;
 	debugMaterial.SubmeshTextures.push_back(TexturePack{.Albedo = GVkImageFactory::SolidColor(Scope, COLOR(255, 255, 0))});

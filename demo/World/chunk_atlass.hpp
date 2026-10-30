@@ -1,14 +1,13 @@
-﻿#pragma once
-#include <glm/gtx/hash.hpp>
-#include "base.hpp"
+#pragma once
 #include "chunk_loader/noize_loader.hpp"
-#include "actor.hpp"
+#include <glm/gtx/hash.hpp>
+#include "Engine/actor.hpp"
+#include "base.hpp"
 #include <vector>
 #include <memory>
 
 class ChunkAtlass
 {
-
 private:
 	/// количество вокселей на одной стороне
 	int32_t _chunk_side;

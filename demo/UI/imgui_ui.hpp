@@ -15,7 +15,7 @@ private:
 	void _weatherControls(IWorld& World);
 	void _cameraPos(const GCamera& Camera, const GPlanetWorld& World);
 public:
-	GUI(std::shared_ptr<RenderScope> Scope, const GVkSharedResources& Resources, GWindow& Window);
+	GUI(std::shared_ptr<RenderScope> Scope, GWindow& Window);
 	~GUI();
 
 	void Execute(const GCamera& Camera, const IWorld& World) override;

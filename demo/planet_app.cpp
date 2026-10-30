@@ -8,8 +8,9 @@ using namespace GEnums;
 
 GPlanetApplication::GPlanetApplication()
 	: IGApplication(SWindowParameters{1024, 720, "Procedural planet demo"})
+	, Scope(Window.GetRenderer().GetScope())
+	, world(Window.GetRenderer().GetScope())
 {
-	Scope = Window.GetRenderer().GetScope();
 	engineListener.SetUserPointer(this);
 	Window.SetUpEvents(engineListener);
 	Window.GetRenderer().AddRenderStage<GUI>(Window);
@@ -19,7 +20,7 @@ GPlanetApplication::GPlanetApplication()
 	engineListener.SubscribeMouseMoveEvent(this, &GPlanetApplication::_mouseMove);
 	engineListener.SubscribeMousePressEvent(this, &GPlanetApplication::_mousePress);
 
-	world._initDebug(Scope);
+	// world._initDebug();
 
 	_debugCube = world.NewActor();
 	_debugCube->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, VOXEL_SIZE / 2, VOXEL_SIZE / 2, VOXEL_SIZE / 2), GMeshMaterial::Create(Scope));
@@ -134,7 +135,7 @@ void GPlanetApplication::_destroyVoxel()
 			c->dirty = true;
 			c->VoxelArray[i].type = 0;
 
-			world._redrawDirtyChunks(Scope);
+			world._redrawDirtyChunks();
 			break;
 		}
 		else
@@ -153,7 +154,7 @@ void GPlanetApplication::_updateCamera(float Delta)
 		camera_speed = DEFAULT_CAMERA_SPEED;
 		// world._redrawDirtyChunks(Scope);
 		auto prevPos = Camera.GetWorldMatrix().GetPosition();
-		world._initVoxels(Scope, prevPos);
+		world._initVoxels(prevPos);
 	}
 
 	if (mouseStates[EMouse::Middle] != EAction::Release)
@@ -190,5 +191,5 @@ void GPlanetApplication::Update(float Delta)
 	Window.SetTitle(("Procedural planet demo " + std::format("{:.1f}", 1.0 / Delta)).c_str());
 	_updateCamera(Delta);
 
-	world.updateChunks(Scope, Camera);
+	world.updateChunks(Camera);
 }

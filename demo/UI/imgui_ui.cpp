@@ -4,17 +4,17 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "planet_app.hpp"
 
-GUI::GUI(std::shared_ptr<RenderScope> Scope, const GVkSharedResources &Resources, GWindow &Window)
+GUI::GUI(std::shared_ptr<RenderScope> Scope, GWindow &Window)
 	: IRenderStage(Scope, VK_QUEUE_GRAPHICS_BIT)
 {
 	ImContext = ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForVulkan(Window.PlatformWindow(), true);
 
 	RenderPassDescriptor RPDesc{};
-	RPDesc.AddAttachmentLoadOp(Resources.FinalTarget->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	RPDesc.AddAttachmentLoadOp(GVkSharedResources::Instance.FinalTarget->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	RenderPass = RPDesc.Construct(Scope);
 
-	Framebuffer = std::make_shared<GVkFramebuffer>(Scope, RenderPass, std::vector{Resources.FinalTarget});
+	Framebuffer = std::make_shared<GVkFramebuffer>(Scope, RenderPass, std::vector{ GVkSharedResources::Instance.FinalTarget});
 
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.ApiVersion = VK_API_VERSION_1_3;
