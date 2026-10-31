@@ -7,9 +7,7 @@
 using namespace GEnums;
 
 GPlanetApplication::GPlanetApplication()
-	: IGApplication(SWindowParameters{1024, 720, "Procedural planet demo"})
-	, Scope(Window.GetRenderer().GetScope())
-	, world(Window.GetRenderer().GetScope())
+	: IGApplication(SWindowParameters{1024, 720, "Procedural planet demo"}), Scope(Window.GetRenderer().GetScope()), world(Window.GetRenderer().GetScope())
 {
 	engineListener.SetUserPointer(this);
 	Window.SetUpEvents(engineListener);
@@ -116,7 +114,6 @@ void GPlanetApplication::_destroyVoxel()
 		if (c)
 		{
 			voxelPosToCheck += fc;
-			glm::dvec3 pvp = voxelPosToCheck;
 			for (int fc_i = 0; fc_i < 3; fc_i++)
 			{
 				if (voxelPosToCheck[fc_i] < 0)
@@ -130,6 +127,23 @@ void GPlanetApplication::_destroyVoxel()
 			{
 				reach++;
 				continue;
+			}
+
+			for (int fc_i = 0; fc_i < 3; fc_i++)
+			{
+				if (voxelPosToCheck[fc_i] < 1e-6 || voxelPosToCheck[fc_i] >= CHUNK_ROW - 1)
+				{
+					glm::dvec3 neighbour_chunk_pos = globalVoxelPos;
+					neighbour_chunk_pos[fc_i] +=
+						voxelPosToCheck[fc_i] < 1e-6
+							? -VOXEL_SIZE
+							: +VOXEL_SIZE;
+
+					Chunk *neighbour_chunk = world._atlass.GetChunkInPoint(neighbour_chunk_pos);
+					if (neighbour_chunk){
+						neighbour_chunk->dirty = true;
+					}
+				}
 			}
 
 			c->dirty = true;

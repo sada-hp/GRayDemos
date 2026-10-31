@@ -7,7 +7,7 @@ glm::ivec3 prevPos = {0, 6360.f * 1e3, 0};
 GPlanetWorld::GPlanetWorld(std::shared_ptr<RenderScope> InScope)
 	: IWorld(InScope)
 {
-	_atlass = ChunkAtlass(10, CHUNK_ROW, CHUNK_SIZE);
+	_atlass = ChunkAtlass(4, CHUNK_ROW, CHUNK_SIZE);
 	// _meshFactory.Size = VOXEL_SIZE;
 }
 
@@ -54,7 +54,7 @@ void GPlanetWorld::updateChunks(const GCamera &Camera)
 	auto Mesh = GVkMeshFactory::Mesh(Scope, vertices, indices);
 	_debugChunkArea->AddComponent<GDrawable>(Mesh, _debugMaterial);
 #else
-		
+
 	glm::ivec3 camPos = ChunkAtlass::ChunkGlobalId(Camera.GetWorldMatrix().GetPosition());
 
 	if (camPos != prevPos)
@@ -67,7 +67,7 @@ void GPlanetWorld::updateChunks(const GCamera &Camera)
 #endif
 }
 
-void GPlanetWorld::_initVoxels(const glm::vec3& position)
+void GPlanetWorld::_initVoxels(const glm::vec3 &position)
 {
 	// _chunks.clear();
 	_atlass.RecalculateAll(position.x, position.y, position.z);
@@ -89,39 +89,29 @@ void GPlanetWorld::_initVoxels(const glm::vec3& position)
 		_debugMaterialWire = GMeshMaterial::Create(Scope, debugMaterialWire);
 	}
 
-	for (auto [p, c] : *_atlass.GetChunks())
+	for (auto [p, c] : _atlass.GetChunks())
 	{
-		auto mesh = _meshFactory.ChunkToMesh(Scope, c, GEllipsoid::Rg);
+		auto mesh = _meshFactory.ChunkToMesh(Scope, c, _atlass, p, GEllipsoid::Rg);
 
-		std::shared_ptr<GActor> chunk = NewActor();
-		chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
-		chunk->AddComponent<Chunk *>(c);
-		chunk->SetPosition(p);
-
-		//std::shared_ptr<GActor> debug_chunk = NewActor();
-		//debug_chunk->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE), _debugMaterialWire);
-		//debug_chunk->Translate(glm::vec3{0, -GEllipsoid::Rg, 0});
-		//debug_chunk->Translate(glm::vec3{p.x, p.y, p.z} + glm::vec3{static_cast<int64_t>(CHUNK_SIZE / 2)});
-
-		// _chunks.push_back(chunk);
-		// _chunks.push_back(debug_chunk);
-		c->Mesh = chunk;
+		if (mesh)
+		{
+			std::shared_ptr<GActor> chunk = NewActor();
+			chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
+			chunk->SetPosition(p);
+			c->Mesh = chunk;
+		}
 		c->dirty = false;
 	}
 }
 
 void GPlanetWorld::_redrawDirtyChunks()
 {
-	// Подразумеваем, что номера чанков здесь в соответсвуют
-	// номкрам мешей в массиве для отрисовки
-	auto chunkList = *_atlass.GetChunks();
-
-	for (auto [p, c] : *_atlass.GetChunks())
+	for (auto [p, c] : _atlass.GetChunks())
 	{
 		if (!c->dirty)
 			continue;
 
-		auto mesh = _meshFactory.ChunkToMesh(Scope, c, GEllipsoid::Rg);
+		auto mesh = _meshFactory.ChunkToMesh(Scope, c, _atlass, p, GEllipsoid::Rg);
 
 		if (mesh)
 		{

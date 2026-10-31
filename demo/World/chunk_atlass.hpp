@@ -36,7 +36,7 @@ public:
 		_chunk_size = chunk_size;
 	};
 
-	const std::unordered_map<glm::ivec3, Chunk *> *GetChunks() const { return &_chunks; }
+	const std::unordered_map<glm::ivec3, Chunk *> &GetChunks() const { return _chunks; }
 
 	Chunk *GetChunkInPoint(glm::dvec3 pos)
 	{

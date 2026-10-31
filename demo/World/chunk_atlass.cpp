@@ -22,12 +22,13 @@ void ChunkAtlass::RecalculateAll(float c_x, float c_y, float c_z)
 		int64_t x = ind % side_size;
 		int64_t z = (ind / side_size) % side_size;
 		int64_t y = (ind / (side_size * side_size)) % side_size;
+
 		int64_t offset = _visible_radius * _chunk_size; // + (_chunk_side / 2);
 		x = _center[0] - offset + x * _chunk_size;
 		y = _center[1] - offset + (y * _chunk_size);
 		z = _center[2] - offset + z * _chunk_size;
 
-		Chunk *c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(x, y, z, [](NoiseParams params)
+		Chunk *c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(x, y, z, [](NoiseParams &params)
 																			{
 				Voxel v = { 0 };
 				// const int y_v = 16;
@@ -96,7 +97,8 @@ void ChunkAtlass::RecalculateDelta(glm::dvec3 pos)
 						delete ch->second;
 						_chunks.erase(ch);
 
- 						glm::ivec3 c_to_c = new_ + c_to_d * -1;
+						// Куда поставить новый чанк
+						glm::ivec3 c_to_c = new_ + c_to_d * -1;
 
 						Chunk *c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(c_to_c.x, c_to_c.y, c_to_c.z, [](NoiseParams params)
 																							{
@@ -110,6 +112,13 @@ void ChunkAtlass::RecalculateDelta(glm::dvec3 pos)
 
 						c->dirty = true;
 						_chunks[c_to_c] = c;
+
+						// Перерисуем чанки на старой границе
+						ch = _chunks.find(c_to_c - d_ * _chunk_size);
+						if (ch != _chunks.end())
+						{
+							ch->second->dirty = true;
+						}
 					}
 				}
 			}

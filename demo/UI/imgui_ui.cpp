@@ -64,7 +64,7 @@ void GUI::_cameraPos(const GCamera &Camera, const GPlanetWorld &World)
 	glm::dvec3 voxelPosToCheck = glm::floor((globalVoxelPos - globalChunkPos) / static_cast<double>(VOXEL_SIZE));
 	ImGui::Text("Voxel %3.2f %3.2f %3.2f", voxelPosToCheck.x, voxelPosToCheck.y, voxelPosToCheck.z);
 	ImGui::Text("Camera %3.2f %3.2f %3.2f", pos.x, pos.y, pos.z);
-	ImGui::Text("Chunks %d", World._atlass.GetChunks()->size());
+	ImGui::Text("Chunks %d", World._atlass.GetChunks().size());
 }
 
 void GUI::Execute(const GCamera &Camera, const IWorld &World)

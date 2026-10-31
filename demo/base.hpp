@@ -3,18 +3,18 @@
 #include <vector>
 #include <memory>
 
-#define VOXEL_SIZE 32.0
-#define VOXEL_RADIUS 22.62741699796952f
-#define CHUNK_ROW_BYTES 4
-#define CHUNK_ROW (1 << CHUNK_ROW_BYTES)
-#define CHUNK_TOWER 3
-#define CHUNK_SIZE static_cast<double>(VOXEL_SIZE * CHUNK_ROW)
-#define CHUNK_SQARE static_cast<int>(CHUNK_ROW * CHUNK_ROW)
-#define CHUNK_CUBE static_cast<int>(CHUNK_ROW * CHUNK_ROW * CHUNK_ROW)
+constexpr double VOXEL_SIZE = 32.0;
+constexpr double  VOXEL_RADIUS = 22.62741699796952f;
+constexpr int CHUNK_ROW_BYTES = 5;
+constexpr int CHUNK_ROW = (1 << CHUNK_ROW_BYTES);
+constexpr int CHUNK_TOWER = 3;
+constexpr double CHUNK_SIZE = static_cast<double>(VOXEL_SIZE * CHUNK_ROW);
+constexpr int CHUNK_SQARE = static_cast<int>(CHUNK_ROW * CHUNK_ROW);
+constexpr int CHUNK_CUBE = static_cast<int>(CHUNK_ROW * CHUNK_ROW * CHUNK_ROW);
 
 struct Voxel {
 public:
-	uint32_t type;
+	uint16_t type;
 };
 
 struct Chunk
@@ -22,7 +22,6 @@ struct Chunk
 public:
 	std::shared_ptr<GActor> Mesh;
 	std::vector<Voxel> VoxelArray;
-	// int64_t x, y, z;
 	bool dirty;
 	~Chunk(){
 		VoxelArray.clear();

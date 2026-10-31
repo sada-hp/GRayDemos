@@ -1,5 +1,6 @@
 #pragma once
 #include "base.hpp"
+#include "World/chunk_atlass.hpp"
 #include "Factories/VkMeshFactory.hpp"
 
 class ChunkMeshfactory {
@@ -12,6 +13,6 @@ private:
 public:
 
 	void FillChunk(Chunk*) const;
-	std::shared_ptr<IMesh> ChunkToMesh(std::shared_ptr<RenderScope> Scope, Chunk*, double earth_radius) const;
+	std::shared_ptr<IMesh> ChunkToMesh(std::shared_ptr<RenderScope> Scope, Chunk*, ChunkAtlass&, glm::ivec3 chunk_position, double earth_radius) const;
 };
 

@@ -3,14 +3,14 @@
 
 Chunk *WhiteNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
 {
-	return LoadCustomFuncChunk(x, y, z, [](NoiseParams params)
+	return LoadCustomFuncChunk(x, y, z, [](NoiseParams &params)
 							   {
 			Voxel v = { 0 };
 			v.type = (params.out >> 24) < 0b1111 ? 1 : 0;
 			return v; });
 }
 
-Chunk *WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std::function<Voxel(NoiseParams)> func)
+Chunk *WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std::function<Voxel(NoiseParams&)> func)
 {
 	NoiseParams params = {
 		x,
