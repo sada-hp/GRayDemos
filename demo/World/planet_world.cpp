@@ -76,12 +76,14 @@ void GPlanetWorld::_initVoxels(const glm::vec3& position)
 	{
 		MaterialDescriptor debugMaterial;
 		debugMaterial.SubmeshTextures.push_back(TexturePack{.Albedo = GVkImageFactory::SolidColor(Scope, COLOR(128, 255, 0))});
+		debugMaterial.Compressed = true;
 		// debugMaterial.PolygonMode = VK_POLYGON_MODE_LINE;
 		// debugMaterial.CullMode = VK_CULL_MODE_NONE;
 
 		MaterialDescriptor debugMaterialWire;
 		debugMaterialWire.SubmeshTextures.push_back(TexturePack{.Albedo = GVkImageFactory::SolidColor(Scope, COLOR(0, 255, 0))});
 		debugMaterialWire.PolygonMode = VK_POLYGON_MODE_LINE;
+		debugMaterial.Compressed = true;
 
 		_debugMaterial = GMeshMaterial::Create(Scope, debugMaterial);
 		_debugMaterialWire = GMeshMaterial::Create(Scope, debugMaterialWire);

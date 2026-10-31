@@ -35,7 +35,7 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 		{{0,0,0}, {0,1,0}, /*{1,1,0},*/ {1,1,0}, {1,0,0}, /*{0,0,0},*/},
 	};
 
-	auto vertices = std::vector<MeshVertex>();
+	auto vertices = std::vector<CompressedVertex>();
 	auto indices = std::vector<uint16_t>();
 	
 	uint16_t indicesTmp[6] = {0};
@@ -65,11 +65,12 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 			if (vx.type != 0) continue;
 
 			for (int vert_it = 0; vert_it < 4; vert_it++) {
-				MeshVertex vertex{ };
+				CompressedVertex vertex{ };
 				vertex.position = static_cast<double>(Size) * (glm::dvec3{x,y,z} + vertexPoints[side_it][vert_it]);
-				vertex.normal = dir;
+				vertex.normal = CompressedVertex::packNormal(dir);
 				vertices.push_back(vertex);
 			}
+
 			indicesTmp[0] = vertexIndex + 0;
 			indicesTmp[1] = vertexIndex + 1;
 			indicesTmp[2] = vertexIndex + 2;
@@ -83,6 +84,7 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 
 	if (vertices.size() == 0)
 		return nullptr;
-	return std::shared_ptr<IMesh>(new GVkMesh<MeshVertex>(Scope, vertices, indices));
+
+	return std::shared_ptr<IMesh>(new GVkMesh<CompressedVertex>(Scope, vertices, indices));
 }
 
