@@ -10,7 +10,7 @@ Chunk WhiteNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
 			return v; });
 }
 
-Chunk WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std::function<Voxel(NoiseParams&)> func)
+Chunk WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std::function<Voxel(NoiseParams &)> func)
 {
 	NoiseParams params = {
 		x,
@@ -20,12 +20,7 @@ Chunk WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std
 	};
 
 	Chunk c = {};
-
-	// c->x = x;
-	// c->y = y;
-	// c->z = z;
 	c.VoxelArray.reserve(_chunkSide * _chunkSide * _chunkSide);
-	// std:: cout << params.x << " "<< params.y << " "<< params.z <<  " " <<  _seed << std::endl;
 
 	for (uint32_t i = 0; i < _chunkSide * _chunkSide * _chunkSide; i++)
 	{

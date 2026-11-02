@@ -23,7 +23,8 @@ GPlanetApplication::GPlanetApplication()
 	_debugCube = world.NewActor();
 	_debugCube->AddComponent<GDrawable>(GVkMeshFactory::Cube(Scope, VOXEL_SIZE / 2, VOXEL_SIZE / 2, VOXEL_SIZE / 2), GMeshMaterial::Create(Scope));
 	_debugCube->Translate(-glm::dvec3(100, 0, 400));
-	Camera.GetWorldMatrix().Move(glm::dvec3(VOXEL_SIZE / 2));
+	// Camera.GetWorldMatrix().Translate(glm::dvec3{195557,0,6094});
+	// Camera.GetWorldMatrix().Move(glm::dvec3(VOXEL_SIZE / 2));
 }
 
 GPlanetApplication::~GPlanetApplication()

@@ -24,27 +24,7 @@ void ChunkAtlass::RecalculateAll(float c_x, float c_y, float c_z)
 		y = _center[1] - offset + (y * _chunk_size);
 		z = _center[2] - offset + z * _chunk_size;
 
-		Chunk c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(x, y, z, [](NoiseParams &params)
-																			{
-				Voxel v = { 0 };
-				// const int y_v = 16;
-				// auto r_x =
-				// 	abs(4.f - static_cast<float>(params.x % 8)) / 4.f;
-				// auto r_y =
-				// 	abs(16.f - static_cast<float>(params.y % 32)) / 16.f;
-				auto val = static_cast<float>(params.out) / static_cast<float>(UINT32_MAX);
-				if (std::sqrtf(params.y * params.y + params.z * params.z + params.x * params.x) <= 6360.f * 1e3)
-					v.type = 1 ;
-				else
-					v.type = val >= .01f ? 0 : 1;
-				// std:: cout << params.x << " "<< params.y << " "<< params.z << std::endl;
-				// std:: cout << params.out << std::endl;
-					
-				// v.type = val >= (r_x * r_y) ? 0 : 1;
-				// int64_t a = params.y % 16;
-				// v.type = (a == 0 || a == 15) ? 1 : 0; 
-				// v.type = (a == 0 || a == 15) ? 1 : 0; 
-				return v; });
+		Chunk c = _loader->LoadChunk(x, y - 6360.f * 1e3, z);
 
 		c.dirty = true;
 		c.pool_index = ind;
@@ -94,15 +74,7 @@ void ChunkAtlass::RecalculateDelta(glm::dvec3 pos)
 						// Куда поставить новый чанк
 						glm::ivec3 c_to_c = new_ + c_to_d * -1;
 
-						Chunk c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(c_to_c.x, c_to_c.y, c_to_c.z, [](NoiseParams params)
-																							{
-							Voxel v = { 0 };
-							auto val = static_cast<float>(params.out) / static_cast<float>(UINT32_MAX);
-							if (std::sqrtf(params.y * params.y + params.z * params.z + params.x * params.x) <= 6360.f * 1e3)
-								v.type = 1 ;
-							else
-								v.type = val >= .01f ? 0 : 1;
-							return v; });
+						Chunk c = _loader->LoadChunk(c_to_c.x, c_to_c.y - 6360.f * 1e3, c_to_c.z);
 
 						// инициализируем новый чанк
 						c.pool_index = ch->second.pool_index;

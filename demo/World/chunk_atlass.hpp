@@ -1,5 +1,5 @@
-#pragma once
-#include "chunk_loader/noize_loader.hpp"
+﻿#pragma once
+#include "chunk_loader/simplex_noise_loader.hpp"
 #include <glm/gtx/hash.hpp>
 #include "Engine/actor.hpp"
 #include "base.hpp"
@@ -29,7 +29,7 @@ private:
 public:
 	ChunkAtlass(const int32_t visible_radius = 2, const int32_t chunk_side = 16, int32_t chunk_size = 32)
 	{
-		_loader = std::make_unique<WhiteNoiseLoader>(0xDEADBEEF, chunk_side);
+		_loader = std::make_unique<SimplexNoiseLoader>(chunk_side);
 
 		_visible_radius = visible_radius;
 		_chunk_side = chunk_side;

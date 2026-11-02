@@ -43,6 +43,7 @@ enum Dirs
 };
 
 const glm::ivec3 dirs[] = { {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1} };
+const int sides[] = { Sides::X, Sides::X, Sides::Y, Sides::Y, Sides::Z, Sides::Z };
 
 std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope> Scope, std::shared_ptr<GGPuMemoryPool> vertexPool, std::shared_ptr<GGPuMemoryPool> indexPool, Chunk *chunk, ChunkAtlass &atlass, glm::ivec3 pos) const
 {
@@ -72,8 +73,8 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 	for (int voxel_it = 0; voxel_it < ChunkSize; voxel_it++)
 	{
 		int x = voxel_it & (ChunkSide - 1);
-		int y = (voxel_it >> (ChunkSideBytes * 2));
-		int z = (voxel_it >> ChunkSideBytes) & (ChunkSide - 1);
+		int z = (voxel_it >> (ChunkSideBytes * 2));
+		int y = (voxel_it >> ChunkSideBytes) & (ChunkSide - 1);
 		Voxel* cur = &(chunk->VoxelArray[x + y * ChunkSide + z * ChunkSide * ChunkSide]);
 
 		if (cur->type == 0)
@@ -87,7 +88,6 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 			// Соседний воксель
 			Voxel vx = { 1 };
 
-			const int sides[] = { Sides::X, Sides::X, Sides::Y, Sides::Y, Sides::Z, Sides::Z };
 			int side = sides[side_it];
 
 			n_chunk = chunk;
