@@ -2,8 +2,6 @@
 #include "Factories/VkImageFactory.hpp"
 #include "Factories/VkMeshFactory.hpp"
 
-glm::ivec3 prevPos = {0, 6360.f * 1e3, 0};
-
 GPlanetWorld::GPlanetWorld(std::shared_ptr<RenderScope> InScope)
 	: IWorld(InScope)
 {
@@ -60,6 +58,7 @@ void GPlanetWorld::updateChunks(const GCamera &Camera)
 	auto Mesh = GVkMeshFactory::Mesh(Scope, vertices, indices);
 	_debugChunkArea->AddComponent<GDrawable>(Mesh, _debugMaterial);
 #else
+	static glm::ivec3 prevPos = ChunkAtlass::ChunkGlobalId(Camera.GetWorldMatrix().GetPosition());
 
 	glm::ivec3 camPos = ChunkAtlass::ChunkGlobalId(Camera.GetWorldMatrix().GetPosition());
 
