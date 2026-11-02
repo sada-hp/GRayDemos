@@ -4,7 +4,7 @@ Chunk SimplexNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
 {
     Chunk c = {};
     float scale = .02f;
-    const int g_low = -32;
+    const int g_low = -0;
     const int g_high = 256;
     const int g_diff = abs(g_low - g_high);
 
@@ -14,7 +14,9 @@ Chunk SimplexNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
     {
         for (v_pos.z = 0; v_pos.z < _chunkSide; v_pos.z++)
         {
-            float noise = _noise.noise((x / VOXEL_SIZE + v_pos.x) * scale, (z / VOXEL_SIZE + v_pos.z) * scale);
+            float noise = 
+                _noise.fractal(3, (x / VOXEL_SIZE + v_pos.x), (z / VOXEL_SIZE + v_pos.z));
+                // _noise.noise((x / VOXEL_SIZE + v_pos.x) * scale, (z / VOXEL_SIZE + v_pos.z) * scale);
 
             int height = noise * g_diff;
 

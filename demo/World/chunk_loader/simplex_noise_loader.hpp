@@ -11,7 +11,7 @@ private:
 public:
     SimplexNoiseLoader(int chunkSide) : _chunkSide(chunkSide)
     {
-        _noise = SimplexNoise(.00003f);
+        _noise = SimplexNoise(.012f, .1f);
     };
     ~SimplexNoiseLoader() {};
 
