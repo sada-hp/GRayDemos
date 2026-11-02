@@ -7,8 +7,14 @@ glm::ivec3 prevPos = {0, 6360.f * 1e3, 0};
 GPlanetWorld::GPlanetWorld(std::shared_ptr<RenderScope> InScope)
 	: IWorld(InScope)
 {
-	_atlass = ChunkAtlass(4, CHUNK_ROW, CHUNK_SIZE);
-	// _meshFactory.Size = VOXEL_SIZE;
+	const int radius = 4;
+	_atlass = ChunkAtlass(radius, CHUNK_ROW, CHUNK_SIZE);
+
+	size_t count = _atlass.BufferSize();
+	size_t stride = ChunkMeshfactory::ChunkSize;
+
+	_vertexMemoryPool = std::make_shared<GGPuMemoryPool>(Scope, EBufferFlags::Vertex, stride * sizeof(CompressedVertex), count);
+	_indexMemoryPool = std::make_shared<GGPuMemoryPool>(Scope, EBufferFlags::Index, stride * sizeof(uint16_t), count);
 }
 
 GPlanetWorld::~GPlanetWorld()
@@ -89,40 +95,45 @@ void GPlanetWorld::_initVoxels(const glm::vec3 &position)
 		_debugMaterialWire = GMeshMaterial::Create(Scope, debugMaterialWire);
 	}
 
-	for (auto [p, c] : _atlass.GetChunks())
-	{
-		auto mesh = _meshFactory.ChunkToMesh(Scope, c, _atlass, p, GEllipsoid::Rg);
+	_vertexMemoryPool->Clear(); _indexMemoryPool->Clear();
 
-		if (mesh)
+	for (auto& [p, c] : _atlass.GetChunks())
+	{
+		if (auto mesh = _meshFactory.ChunkToMesh(Scope, _vertexMemoryPool, _indexMemoryPool, &c, _atlass, p))
 		{
 			std::shared_ptr<GActor> chunk = NewActor();
+
 			chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
 			chunk->SetPosition(p);
-			c->Mesh = chunk;
+			c.Mesh = chunk;
 		}
-		c->dirty = false;
+
+		c.dirty = false;
 	}
+
+	_vertexMemoryPool->Flush(); _indexMemoryPool->Flush();
 }
 
 void GPlanetWorld::_redrawDirtyChunks()
 {
-	for (auto [p, c] : _atlass.GetChunks())
+	for (auto& [p, c] : _atlass.GetChunks())
 	{
-		if (!c->dirty)
+		if (!c.dirty)
 			continue;
 
-		auto mesh = _meshFactory.ChunkToMesh(Scope, c, _atlass, p, GEllipsoid::Rg);
-
-		if (mesh)
+		if (auto mesh = _meshFactory.ChunkToMesh(Scope, _vertexMemoryPool, _indexMemoryPool, &c, _atlass, p))
 		{
 			std::shared_ptr<GActor> chunk = NewActor();
+
 			chunk->AddComponent<GDrawable>(mesh, _debugMaterial);
 			chunk->SetPosition(p);
-			c->Mesh = chunk;
+			c.Mesh = chunk;
 		}
 
-		c->dirty = false;
+		c.dirty = false;
 	}
+
+	_vertexMemoryPool->Flush(); _indexMemoryPool->Flush();
 }
 
 void GPlanetWorld::_initDebug()

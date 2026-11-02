@@ -12,34 +12,15 @@ constexpr double CHUNK_SIZE = static_cast<double>(VOXEL_SIZE * CHUNK_ROW);
 constexpr int CHUNK_SQARE = static_cast<int>(CHUNK_ROW * CHUNK_ROW);
 constexpr int CHUNK_CUBE = static_cast<int>(CHUNK_ROW * CHUNK_ROW * CHUNK_ROW);
 
-struct Voxel {
-public:
+struct Voxel 
+{
 	uint16_t type;
 };
 
 struct Chunk
 {
-public:
 	std::shared_ptr<GActor> Mesh;
 	std::vector<Voxel> VoxelArray;
+	uint32_t pool_index;
 	bool dirty;
-	~Chunk(){
-		VoxelArray.clear();
-	}
-};
-
-
-struct PlanetChunk
-{
-public:
-	std::vector<Voxel> VoxelArray;
-	// double 
-	uint32_t Layer = 0;
-	uint32_t Height = 0;
-	uint32_t Number = 0;
-
-
-	~PlanetChunk(){
-		VoxelArray.clear();
-	}
 };

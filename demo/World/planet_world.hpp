@@ -4,16 +4,21 @@
 #include <entt/entt.hpp>
 
 #include "Materials/mesh_material.hpp"
-#include "chunks.hpp"
+#include "Allocators/gpu_block.hpp"
 #include "chunk_atlass.hpp"
+#include "chunks.hpp"
 
 class GPlanetWorld : public IWorld
 {
 private:
 	constexpr static uint32_t debug_subdivisions = 512;
 
-	std::shared_ptr<GMeshMaterial> _debugMaterial;
+	std::shared_ptr<GGPuMemoryPool> _vertexMemoryPool;
+	std::shared_ptr<GGPuMemoryPool> _indexMemoryPool;
+
 	std::shared_ptr<GMeshMaterial> _debugMaterialWire;
+	std::shared_ptr<GMeshMaterial> _debugMaterial;
+
 	std::shared_ptr<GActor> _debugChunkArea;
 	std::shared_ptr<GActor> _debugSphere;
 	std::shared_ptr<GActor> _debugCube;

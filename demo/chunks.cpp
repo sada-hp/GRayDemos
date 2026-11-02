@@ -42,31 +42,30 @@ enum Dirs
 	NegZ = 5,
 };
 
-const glm::ivec3 dirs[] = {
-	{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
+const glm::ivec3 dirs[] = { {1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1} };
 
-std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope> Scope, Chunk *chunk, ChunkAtlass &atlass, glm::ivec3 pos, double earth_radius) const
+std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope> Scope, std::shared_ptr<GGPuMemoryPool> vertexPool, std::shared_ptr<GGPuMemoryPool> indexPool, Chunk *chunk, ChunkAtlass &atlass, glm::ivec3 pos) const
 {
 	const glm::vec3 vertexPoints[][4] = {
-		{{1, 0, 0}, {1, 1, 0}, {1, 1, 1}, {1, 0, 1}},
-		{{0, 0, 0}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}},
-		{{0, 1, 0}, {0, 1, 1}, {1, 1, 1}, {1, 1, 0}},
-		{{0, 0, 0}, {1, 0, 0}, {1, 0, 1}, {0, 0, 1}},
-		{{0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}},
-		{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}},
+	{{1, 0, 0}, {1, 1, 0}, {1, 1, 1}, {1, 0, 1}},
+	{{0, 0, 0}, {0, 0, 1}, {0, 1, 1}, {0, 1, 0}},
+	{{0, 1, 0}, {0, 1, 1}, {1, 1, 1}, {1, 1, 0}},
+	{{0, 0, 0}, {1, 0, 0}, {1, 0, 1}, {0, 0, 1}},
+	{{0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}},
+	{{0, 0, 0}, {0, 1, 0}, {1, 1, 0}, {1, 0, 0}},
 	};
 
-	Chunk *neighbours[6];
-	Chunk *n_chunk;
+	auto vertices = std::vector<CompressedVertex>();
+	auto indices = std::vector<uint16_t>();
+
+	Chunk* neighbours[6];
+	Chunk* n_chunk;
 	for (int c = 0; c < 6; c++)
 	{
 		neighbours[c] = atlass.GetChunkInPoint(pos + dirs[c] * static_cast<int>(Size * ChunkSide));
 	}
 
-	auto vertices = std::vector<CompressedVertex>();
-	auto indices = std::vector<uint16_t>();
-
-	uint16_t indicesTmp[6] = {0};
+	uint16_t indicesTmp[6] = { 0 };
 	uint16_t vertexIndex = 0;
 	int vertexOffset = 0;
 
@@ -75,7 +74,7 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 		int x = voxel_it & (ChunkSide - 1);
 		int y = (voxel_it >> (ChunkSideBytes * 2));
 		int z = (voxel_it >> ChunkSideBytes) & (ChunkSide - 1);
-		Voxel *cur = &(chunk->VoxelArray[x + y * ChunkSide + z * ChunkSide * ChunkSide]);
+		Voxel* cur = &(chunk->VoxelArray[x + y * ChunkSide + z * ChunkSide * ChunkSide]);
 
 		if (cur->type == 0)
 			continue;
@@ -83,12 +82,12 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 		for (int side_it = 0; side_it < 6; side_it++)
 		{
 			glm::ivec3 dir = dirs[side_it];
-			glm::ivec3 dir_p = dir + glm::ivec3{x, y, z};
+			glm::ivec3 dir_p = dir + glm::ivec3{ x, y, z };
 
 			// Соседний воксель
-			Voxel vx = {1};
+			Voxel vx = { 1 };
 
-			const int sides[] = {Sides::X, Sides::X, Sides::Y, Sides::Y, Sides::Z, Sides::Z};
+			const int sides[] = { Sides::X, Sides::X, Sides::Y, Sides::Y, Sides::Z, Sides::Z };
 			int side = sides[side_it];
 
 			n_chunk = chunk;
@@ -98,7 +97,7 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 				n_chunk = neighbours[side_it];
 			}
 
-			if (n_chunk){
+			if (n_chunk) {
 				vx = (n_chunk->VoxelArray.data()[dir_p.x + dir_p.y * ChunkSide + dir_p.z * ChunkSide * ChunkSide]);
 			}
 
@@ -108,7 +107,7 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 			for (int vert_it = 0; vert_it < 4; vert_it++)
 			{
 				CompressedVertex vertex{};
-				vertex.position = Size * (glm::vec3{x, y, z} + vertexPoints[side_it][vert_it]);
+				vertex.position = Size * (glm::vec3{ x, y, z } + vertexPoints[side_it][vert_it]);
 				vertex.normal = CompressedVertex::packNormal(dir);
 				vertices.push_back(vertex);
 			}
@@ -127,5 +126,8 @@ std::shared_ptr<IMesh> ChunkMeshfactory::ChunkToMesh(std::shared_ptr<RenderScope
 	if (vertices.size() == 0)
 		return nullptr;
 
-	return std::shared_ptr<IMesh>(new GVkMesh<CompressedVertex>(Scope, vertices, indices));
+	auto vertexView = vertexPool->GetBlock(chunk->pool_index, vertices.size() * sizeof(CompressedVertex), vertices.data());
+	auto indexView = indexPool->GetBlock(chunk->pool_index, indices.size() * sizeof(uint16_t), indices.data());
+
+	return std::shared_ptr<IMesh>(new GVkMesh<CompressedVertex>(Scope, vertexView, indexView, VK_INDEX_TYPE_UINT16, glm::vec3(0), glm::vec3(Size * Size)));
 }

@@ -3,10 +3,6 @@
 
 void ChunkAtlass::RecalculateAll(float c_x, float c_y, float c_z)
 {
-	for (auto [key, chunk] : _chunks)
-	{
-		delete chunk;
-	}
 	_chunks.clear();
 
 	uint32_t side_size = 1 + _visible_radius * 2;
@@ -28,7 +24,7 @@ void ChunkAtlass::RecalculateAll(float c_x, float c_y, float c_z)
 		y = _center[1] - offset + (y * _chunk_size);
 		z = _center[2] - offset + z * _chunk_size;
 
-		Chunk *c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(x, y, z, [](NoiseParams &params)
+		Chunk c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(x, y, z, [](NoiseParams &params)
 																			{
 				Voxel v = { 0 };
 				// const int y_v = 16;
@@ -50,7 +46,8 @@ void ChunkAtlass::RecalculateAll(float c_x, float c_y, float c_z)
 				// v.type = (a == 0 || a == 15) ? 1 : 0; 
 				return v; });
 
-		c->dirty = true;
+		c.dirty = true;
+		c.pool_index = ind;
 		_chunks[glm::ivec3{x, y, z}] = c;
 		// _chunks.push_back(c);
 	}
@@ -94,13 +91,10 @@ void ChunkAtlass::RecalculateDelta(glm::dvec3 pos)
 					auto ch = _chunks.find(_center + c_to_d);
 					if (ch != _chunks.end())
 					{
-						delete ch->second;
-						_chunks.erase(ch);
-
 						// Куда поставить новый чанк
 						glm::ivec3 c_to_c = new_ + c_to_d * -1;
 
-						Chunk *c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(c_to_c.x, c_to_c.y, c_to_c.z, [](NoiseParams params)
+						Chunk c = ((WhiteNoiseLoader *)_loader.get())->LoadCustomFuncChunk(c_to_c.x, c_to_c.y, c_to_c.z, [](NoiseParams params)
 																							{
 							Voxel v = { 0 };
 							auto val = static_cast<float>(params.out) / static_cast<float>(UINT32_MAX);
@@ -110,14 +104,20 @@ void ChunkAtlass::RecalculateDelta(glm::dvec3 pos)
 								v.type = val >= .01f ? 0 : 1;
 							return v; });
 
-						c->dirty = true;
+						// инициализируем новый чанк
+						c.pool_index = ch->second.pool_index;
+						c.dirty = true;
+
+						// освобождаем старый чанк
+						_chunks.erase(ch);
+
 						_chunks[c_to_c] = c;
 
 						// Перерисуем чанки на старой границе
 						ch = _chunks.find(c_to_c - d_ * _chunk_size);
 						if (ch != _chunks.end())
 						{
-							ch->second->dirty = true;
+							ch->second.dirty = true;
 						}
 					}
 				}

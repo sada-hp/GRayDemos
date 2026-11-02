@@ -40,7 +40,7 @@ public:
 	/// <summary>
 	/// Сгенерируем белый шум
 	/// </summary>
-	Chunk* LoadChunk(int64_t x, int64_t y, int64_t z) override;
+	Chunk LoadChunk(int64_t x, int64_t y, int64_t z) override;
 
-	Chunk* LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std::function<Voxel(NoiseParams&)> func) ;
+	Chunk LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std::function<Voxel(NoiseParams&)> func) ;
 };

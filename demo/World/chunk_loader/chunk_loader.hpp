@@ -15,5 +15,5 @@ public:
 	/// <summary>
 	/// Загрузка чанка из внешней среды
 	/// </summary>
-	virtual Chunk* LoadChunk(int64_t x, int64_t y, int64_t z) = 0;
+	virtual Chunk LoadChunk(int64_t x, int64_t y, int64_t z) = 0;
 };

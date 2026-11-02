@@ -24,7 +24,7 @@ private:
 
 	std::vector<GActor *> _chunkMeshes = {};
 	// std::vector<Chunk *> _chunks = {};
-	std::unordered_map<glm::ivec3, Chunk *> _chunks = {};
+	std::unordered_map<glm::ivec3, Chunk> _chunks = {};
 
 public:
 	ChunkAtlass(const int32_t visible_radius = 2, const int32_t chunk_side = 16, int32_t chunk_size = 32)
@@ -36,14 +36,17 @@ public:
 		_chunk_size = chunk_size;
 	};
 
-	const std::unordered_map<glm::ivec3, Chunk *> &GetChunks() const { return _chunks; }
+	size_t BufferSize() const { return std::pow(1 + _visible_radius * 2, 3);}
+
+	const std::unordered_map<glm::ivec3, Chunk>& GetChunks() const { return _chunks; }
+	std::unordered_map<glm::ivec3, Chunk>& GetChunks() { return _chunks; }
 
 	Chunk *GetChunkInPoint(glm::dvec3 pos)
 	{
 		pos = floor(pos / static_cast<double>(_chunk_size)) * static_cast<double>(_chunk_size);
 		auto ch = _chunks.find(pos);
 		if (ch != _chunks.end())
-			return ch->second;
+			return &ch->second;
 		return nullptr;
 	}
 

@@ -1,7 +1,7 @@
 #include "iostream"
 #include "noize_loader.hpp"
 
-Chunk *WhiteNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
+Chunk WhiteNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
 {
 	return LoadCustomFuncChunk(x, y, z, [](NoiseParams &params)
 							   {
@@ -10,7 +10,7 @@ Chunk *WhiteNoiseLoader::LoadChunk(int64_t x, int64_t y, int64_t z)
 			return v; });
 }
 
-Chunk *WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std::function<Voxel(NoiseParams&)> func)
+Chunk WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, std::function<Voxel(NoiseParams&)> func)
 {
 	NoiseParams params = {
 		x,
@@ -18,12 +18,13 @@ Chunk *WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, st
 		z,
 		_seed,
 	};
-	Chunk *c = new Chunk();
+
+	Chunk c = {};
 
 	// c->x = x;
 	// c->y = y;
 	// c->z = z;
-	c->VoxelArray.reserve(_chunkSide * _chunkSide * _chunkSide);
+	c.VoxelArray.reserve(_chunkSide * _chunkSide * _chunkSide);
 	// std:: cout << params.x << " "<< params.y << " "<< params.z <<  " " <<  _seed << std::endl;
 
 	for (uint32_t i = 0; i < _chunkSide * _chunkSide * _chunkSide; i++)
@@ -35,7 +36,7 @@ Chunk *WhiteNoiseLoader::LoadCustomFuncChunk(int64_t x, int64_t y, int64_t z, st
 		MurmurHash3_x86_32(&params, sizeof(params), _seed, &params.out);
 
 		Voxel v = func(params);
-		c->VoxelArray.push_back(v);
+		c.VoxelArray.push_back(v);
 	}
 
 	return c;
