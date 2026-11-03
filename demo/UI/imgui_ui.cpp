@@ -4,6 +4,12 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "planet_app.hpp"
 
+void GUI::setup_dependencies(const IWorld& World)
+{
+	auto final_view = GVkImage::ToView(GVkSharedResources::Instance.FinalTarget);
+	Resources.add(final_view, EResourceOp::ReadWrite, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
+}
+
 GUI::GUI(std::shared_ptr<RenderScope> Scope, GWindow &Window)
 	: IRenderStage(Scope, VK_QUEUE_GRAPHICS_BIT)
 {
@@ -11,7 +17,7 @@ GUI::GUI(std::shared_ptr<RenderScope> Scope, GWindow &Window)
 	ImGui_ImplGlfw_InitForVulkan(Window.PlatformWindow(), true);
 
 	RenderPassDescriptor RPDesc{};
-	RPDesc.AddAttachmentLoadOp(GVkSharedResources::Instance.FinalTarget->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	RPDesc.AddAttachmentLoadOp(GVkSharedResources::Instance.FinalTarget->GetFormat(), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 	RenderPass = RPDesc.Construct(Scope);
 
 	Framebuffer = std::make_shared<GVkFramebuffer>(Scope, RenderPass, std::vector{ GVkSharedResources::Instance.FinalTarget});
@@ -67,7 +73,7 @@ void GUI::_cameraPos(const GCamera &Camera, const GPlanetWorld &World)
 	ImGui::Text("Chunks %d", World._atlass.GetChunks().size());
 }
 
-void GUI::Execute(const GCamera &Camera, const IWorld &World)
+void GUI::record(const GCamera &Camera, const IWorld &World)
 {
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -83,5 +89,5 @@ void GUI::Execute(const GCamera &Camera, const IWorld &World)
 
 	CommandBuffer->BeginRenderPass(RenderPass, Framebuffer);
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), CommandBuffer->GetCommandBuffer());
-	CommandBuffer->Submit();
+	CommandBuffer->EndRenderPass();
 }

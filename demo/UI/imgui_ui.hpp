@@ -14,11 +14,14 @@ class GUI : public IRenderStage
 private:
 	void _weatherControls(IWorld& World);
 	void _cameraPos(const GCamera& Camera, const GPlanetWorld& World);
+
+protected:
+	void setup_dependencies(const IWorld& World) override;
+	void record(const GCamera& Camera, const IWorld& World) override;
+
 public:
 	GUI(std::shared_ptr<RenderScope> Scope, GWindow& Window);
 	~GUI();
-
-	void Execute(const GCamera& Camera, const IWorld& World) override;
 
 	static bool IsFocused()
 	{
