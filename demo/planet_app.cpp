@@ -203,8 +203,13 @@ void GPlanetApplication::_updateCamera(float Delta)
 
 void GPlanetApplication::Update(float Delta)
 {
+	double time = glfwGetTime();
+
 	Window.SetTitle(("Procedural planet demo " + std::format("{:.1f}", 1.0 / Delta)).c_str());
 	_updateCamera(Delta);
+
+	_debugCube->GetTransform().GetLocalMatrix().Translate(glm::vec3{ 0.0, Delta * 100.0 * glm::sin(glm::fract(time) * glm::two_pi<double>()), 0.0 });
+	_debugCube->GetTransform().GetLocalMatrix().Rotate(0.f, Delta * 360.f, 0.f);
 
 	world.updateChunks(Camera);
 }

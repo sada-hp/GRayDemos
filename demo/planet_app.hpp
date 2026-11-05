@@ -11,7 +11,6 @@
 
 class GPlanetApplication : public IGApplication
 {
-private:
 
 public:
 	std::map<GEnums::EMouse, GEnums::EAction> mouseStates;
